@@ -2038,7 +2038,7 @@ Robot {
       0 0 0
     ]
   }
-  controller "experimental"
+  controller "lab3_controller_1"
   supervisor TRUE
   cpuConsumption 1.11
   remoteControl "e-puck_bluetooth"
