@@ -1,0 +1,58 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.01709396420578296 0.9993753014381452 -0.03093223663344945 1.0100782240588002
+  position -1.4620553911761025 0.07985799100477198 2.2998998715447683
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+}
+E-puck {
+  hidden position_0_0 120.685569709436
+  hidden position_0_1 98.67813998350017
+  hidden linearVelocity_0 0.06239240668888734 -0.007119816243667214 1.9381230118454717e-05
+  hidden angularVelocity_0 9.844331572002828e-06 -0.00018155133509279798 -4.0073924432045616e-07
+  hidden rotation_1 0 -1 0 1.6678240797914206
+  hidden rotation_2 0 0.9999999999999999 0 1.2967698536112282
+  translation 0.24091868659447727 0.4392654823760908 -6.642863927451906e-05
+  rotation 0.0005429527195688023 0.010101797215624334 -0.9999488281383997 0.11361942409942984
+  controller "lab1control"
+}
+Solid {
+  translation 1.1032751704922547e-07 -0.4003441404667832 0.049610218945021684
+  rotation -0.9999996573390488 -0.00028112216727652973 0.0007786476173190717 0.001407739421063783
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.666667 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.15 0.2 0.1
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.15 0.2 0.1
+  }
+  physics Physics {
+    mass 1
+  }
+  linearVelocity 2.6050591929865927e-09 1.7722395135592727e-05 -1.3234989336297064e-07
+  angularVelocity 7.255260388479915e-05 5.414643002027506e-08 -2.5154013188492e-08
+}
+PointLight {
+  attenuation 0 0 1
+  location -0.4 0.2 0.04
+}
