@@ -21,7 +21,7 @@ MAX_SPEED = 6.28  # rad/s motor limit in Webots
 # get the time step of the current world.
 SIM_TIMESTEP = int(robot.getBasicTimeStep())
 
-# Keyboard (for mode switching)
+# Keyboard ( to test the other modes easier) 
 keyboard = Keyboard()
 keyboard.enable(SIM_TIMESTEP)
 
@@ -422,7 +422,7 @@ while robot.step(SIM_TIMESTEP) != -1:
         v_cmd = 0.0
         w_cmd = 0.0
 
-        # 1) rotate to face goal (reduce alpha)
+        #  face goal (reduce alpha)
         if tdt_state == TDT_STATES.turn_to_goal:
             if abs(alpha) > ALPHA_TOL:
                 v_cmd = 0.0
@@ -432,7 +432,7 @@ while robot.step(SIM_TIMESTEP) != -1:
                 v_cmd = 0.0
                 w_cmd = 0.0
 
-        # 2) drive forward (reduce rho)
+        # drive forward (reduce rho)
         elif tdt_state == TDT_STATES.drive_to_goal:
             if rho > RHO_TOL_TDT:
                 v_cmd = clamp(K_DRIVE * rho, 0.0, 0.12)
@@ -442,13 +442,12 @@ while robot.step(SIM_TIMESTEP) != -1:
                 v_cmd = 0.0
                 w_cmd = 0.0
 
-        # 3) rotate to heading (reduce eta), then advance waypoint ONCE
+        # 3) rotate and advance
         elif tdt_state == TDT_STATES.turn_to_heading:
             if abs(eta) > ETA_TOL:
                 v_cmd = 0.0
                 w_cmd = K_TURN * eta
             else:
-                # SINGLE waypoint mechanism: advance ONLY here for TDT
                 index = (index + 1) % len(waypoints)
                 tdt_state = TDT_STATES.turn_to_goal
                 v_cmd = 0.0
@@ -456,9 +455,8 @@ while robot.step(SIM_TIMESTEP) != -1:
 
         leftSpeed, rightSpeed = ik_from_vw(v_cmd, w_cmd)
 
-    # ---- Line Following (Lab2 copy) ----
+    #lsn following line
     elif control_mode == CONTROL_MODES.line_following:
-        # simplified line-following behavior
         if centersensordetection:
             leftSpeed = MAX_SPEED * 0.85
             rightSpeed = MAX_SPEED * 0.85
@@ -474,9 +472,7 @@ while robot.step(SIM_TIMESTEP) != -1:
                 leftSpeed = -MAX_SPEED * rotamt
                 rightSpeed = MAX_SPEED * rotamt
 
-    # -------------------------
-    # Lab2-style odometry calculations (optional toggle O uses these)
-    # -------------------------
+    #lab 2 odometry calculations
     angle_of_rotation_left_total = left_wheel_sensor.getValue()
     angle_of_rotation_right_total = right_wheel_sensor.getValue()
 
