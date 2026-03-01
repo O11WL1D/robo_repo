@@ -194,6 +194,37 @@ def report(option, message):
 
         print("Temp angle velos" + str(invangleveloframe))
 
+    # Waypoint and inv kinematics debugging. 
+    if(option==3):
+
+
+        
+        print("CURRENT ROBOT STATE:  " + str(robotstate)+ "  CURRENT ROBOT SUBSTATE:    " + str(robotsubstate))
+        print("Current pose: [%5f, %5f, %5f]" % (pose_x, pose_y, pose_theta))
+
+
+        print("left_Wheel angle (rad):", angle_of_rotation_left_total)
+        print("right_Wheel angle (rad):", angle_of_rotation_right_total)
+
+        print("left_Wheel angle inf (rad):", diffleft)
+        print("right_Wheel angle inf (rad):", diffright)
+
+        print("left_Wheel angle velo inf (rad):", infvelofrotleft)
+        print("right_Wheel angle velo inf (rad):", infvelofrotright)
+
+        print("total Robot frame: \n", totalrobotframe)
+        print("total I frame: \n", totalIframe)
+
+        print("temp Inverse solved robot frame: \n", tempinvrobotframe)
+        #print("full Inverse solved robot frame: \n", invrobotframe)
+
+        print("Theta " + str(theta))
+
+        print("Temp angle velos" + str(invangleveloframe))
+        print("MODE:", control_mode, "WP_INDEX:", index, "GOAL:", x_goal, y_goal, "POSE:", gt_x, gt_y, "RHO:", rho, "ALPHA:", alpha, "ETA:", eta)
+        
+
+
 
 
 
@@ -442,6 +473,8 @@ def update_odometry2(infveloleft,infveloright):
      temptheta=tempframe[2][0]
      IKanglevelosolver()
 
+     
+
 
 
 
@@ -656,9 +689,11 @@ while robot.step(SIM_TIMESTEP) != -1:
         x_goal, y_goal, theta_goal = gt_x, gt_y, gt_theta
         rho, alpha, eta, goal_angle = 0.0, 0.0, 0.0, gt_theta
 
+
+
     # Added for debugging waypoint controller (prints every ~2 seconds)
-    if int(robot.getTime()) % 2 == 0:
-        print("MODE:", control_mode, "WP_INDEX:", index, "GOAL:", x_goal, y_goal, "POSE:", gt_x, gt_y, "RHO:", rho, "ALPHA:", alpha, "ETA:", eta)
+    #if int(robot.getTime()) % 2 == 0:
+        
 
     # Added for Lab 3 Part 2/3 controllers
     if control_mode==CONTROL_MODES.line_following:
@@ -833,8 +868,13 @@ while robot.step(SIM_TIMESTEP) != -1:
 
 
     # debug prints are expensive; print at a slower rate so control stays responsive
-    if int(robot.getTime()*5) % 5 == 0:
-        report(2,currenttime)
+    #if int(robot.getTime()*5) % 5 == 0:
+     #   report(2,currenttime)
+
+
+    # uncomment for higher frequency debug 
+    report(3,currenttime)
+
 
     leftMotor.setVelocity(leftSpeed)
     rightMotor.setVelocity(rightSpeed)
