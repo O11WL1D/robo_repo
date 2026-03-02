@@ -115,6 +115,18 @@ def report():
 
 
 
+lidar_sensor_readings = []
+
+# Precompute lidar ray angles (centered at 0)
+lidar_sensor_readings = np.linspace(
+    -LIDAR_ANGLE_RANGE/2,
+    LIDAR_ANGLE_RANGE/2,
+    NUM_LIDAR_RAYS
+)
+
+print(lidar_sensor_readings)
+
+print(lidar_sensor_readings[10])
 
 
 
