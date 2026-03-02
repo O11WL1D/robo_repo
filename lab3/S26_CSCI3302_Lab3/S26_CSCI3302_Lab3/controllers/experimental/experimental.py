@@ -23,6 +23,9 @@ delta_t = timestep/1000.0    # [s]
 
 
 
+
+
+
 # Robot pose
 # Adjust the initial values to match the initial robot pose in your simulation
 x = -0.06    # position in x [m]
@@ -816,6 +819,8 @@ while robot.step(timestep) != -1:
     linedetected= ((gsr[0]<groundthresh) and (gsr[2]<groundthresh) and (gsr[1]<groundthresh)) 
 
     offtrack=(not leftsensordetection and not centersensordetection and not rightsensordetection)
+
+
 
 
 

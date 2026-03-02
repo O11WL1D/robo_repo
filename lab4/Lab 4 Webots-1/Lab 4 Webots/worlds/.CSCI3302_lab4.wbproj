@@ -10,4 +10,4 @@ globalOptionalRendering: CoordinateSystem::LidarPointClouds
 consoles: Console:All:All
 consoles: Console:All:All
 renderingDevicePerspectives: e-puck:camera;0;1.44231;0;0.0801106
-renderingDevicePerspectives: e-puck:display;1;0.833333;0.665189;0.671329
+renderingDevicePerspectives: e-puck:display;1;0.833333;0.0369549;0.188812
