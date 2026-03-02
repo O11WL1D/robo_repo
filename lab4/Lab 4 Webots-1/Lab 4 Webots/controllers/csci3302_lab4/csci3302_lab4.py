@@ -50,6 +50,7 @@ for gs in ground_sensors:
 # Initialize the Display
 display = robot.getDevice("display")
 
+
 # get and enable lidar
 lidar = robot.getDevice("LDS-01")
 lidar.enable(SIM_TIMESTEP)
@@ -106,7 +107,17 @@ print(lidar_sensor_readings[10])
 def report():
     print("CURRENT xPOSE " + str(pose_x) + " CURRENT yPOSE " +str(pose_y))
 
+DISPLAY_WIDTH = 300
+DISPLAY_HEIGHT = 300
 
+def world_to_display(x, y):
+    px = int(x * DISPLAY_WIDTH)
+    py = int(y * DISPLAY_HEIGHT)
+
+    px = max(0, min(DISPLAY_WIDTH - 1, px))
+    py = max(0, min(DISPLAY_HEIGHT - 1, py))
+
+    return px, py
 
 
 
@@ -147,8 +158,20 @@ while robot.step(SIM_TIMESTEP) != -1:
     # Come up with a way to transform the robot pose (in map coordinates)
     # into discrete locations on the display. Draw a red dot using display.drawPixel()
     # where the robot moves.
+
     display.setColor(0xFF0000)
     display.drawPixel(pose_x, pose_y)
+
+
+    # Convert robot world pose to display pixel
+    robot_px, robot_py = world_to_display(pose_x, pose_y)
+
+    # Store visited pixel
+    #visited_pixels.add((robot_px, robot_py))
+
+    # Draw robot in red
+    display.setColor(0xFF0000)
+    display.drawPixel(robot_px, robot_py)
 
 
 
