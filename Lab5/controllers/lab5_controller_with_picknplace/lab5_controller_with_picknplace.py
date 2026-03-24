@@ -560,8 +560,13 @@ while robot.step(timestep) != -1 and mode != 'planner':
         if(front_free and left_free):
             robot_state=ROTATING_RIGHT 
             
-        
 
+        
+        #if(right>right_thresh):
+         #   robot_state=ROTATING_RIGHT
+         
+        
+        
 
         if(robot_state==ROTATING_RIGHT):
         
