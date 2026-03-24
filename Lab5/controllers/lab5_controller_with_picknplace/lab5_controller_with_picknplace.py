@@ -68,6 +68,8 @@ pose_theta = 0
 
 vL = 0
 vR = 0
+timepassed=0
+timepassed1=0
 
 lidar_sensor_readings = [] # List to hold sensor readings
 lidar_offsets = np.linspace(-LIDAR_ANGLE_RANGE/2., +LIDAR_ANGLE_RANGE/2., LIDAR_ANGLE_BINS)
@@ -232,7 +234,8 @@ robot_state=FORWARD
 
 
 
-
+prev_time=0
+current_time=0
 
 
 
@@ -446,6 +449,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
     elif mode == 'autonomous':
+        current_time=step_count*timestep
         #Autonomously explore the entire environment, generate a map, and store the map as an npy file
         vL = 0.0
         vR = 0.0
@@ -508,11 +512,29 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(parallel_wall2):
-            robot_state=FORWARD
+        #if(parallel_wall2):
+        #   robot_state=FORWARD
+
+
+        
+
+        
 
 
 
+        if(robot_state==ROTATING_LEFT):
+            1==1
+            timepassed=timepassed+(current_time-prev_time)
+
+            print(timepassed)
+
+            if(timepassed>430):
+                robot_state=FORWARD
+                timepassed=0
+            
+
+
+        
 
 
 
@@ -538,6 +560,16 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
         vR = clamp(vR, -MAX_SPEED, MAX_SPEED)
+
+        
+        timepassed1=timepassed1+(current_time-prev_time)
+        if(timepassed1<2000):
+            vL=0
+            vR=0
+
+
+        prev_time=step_count*timestep
+
 
     # Odometry code. Don't change vL or vR speeds after this line.
     # We are using GPS and compass for this lab to get a better pose but this is how you'll do the odometry
