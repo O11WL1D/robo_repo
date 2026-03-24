@@ -179,6 +179,8 @@ def get_lidar_regions(ranges):
 #states
 FORWARD=1
 ROTATING_LEFT=2
+A90_LEFT=5
+A45_LEFT=6
 ROTATING_RIGHT=3
 
 robot_state=FORWARD
@@ -527,8 +529,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
         parallel_wall2=((front<3.5+thresh) and (front > 3.5-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
 
         if(front_active):
-            robot_state=ROTATING_LEFT
-
+            robot_state=A90_LEFT
 
      
        # if(robot_state==ROTATING_LEFT):
@@ -543,10 +544,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(front_free and left_free and (not right_free)):
-            robot_state=ROTATING_RIGHT 
 
-        if(front_free and left_free and (right_free)):
+
+        if(front_free and left_free):
             robot_state=ROTATING_RIGHT 
             
         
@@ -577,7 +577,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(robot_state==ROTATING_LEFT):
+        if(robot_state==A90_LEFT):
             1==1
             timepassed=timepassed+(current_time-prev_time)
 
@@ -599,7 +599,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             
         
-        if(robot_state==ROTATING_LEFT):
+        if(robot_state==ROTATING_LEFT or robot_state==A90_LEFT):
             vL=-BASE_SPEED
             vR=BASE_SPEED
 
