@@ -456,10 +456,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
         left  = regions["left"]
         right = regions["right"]
 
-        print("current front reading: "+ str(front)+ "current left reading: " + str(left)+ "current right: " + str(right))
-
+        
         WALL_DIST = 0.6
-        FRONT_TH  = 0.7
+        FRONT_TH  = 0.8
         KP = 3.0
 
         vL = 0.0
@@ -468,9 +467,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         #Condition detection:
 
-        Left_thresh=0.25
-        Front_thresh=0.25
-        right_thresh=0.25
+        Left_thresh=1.0
+        Front_thresh=1.0
+        right_thresh=1.0
 
         front_active=0
         left_active=0
@@ -488,6 +487,31 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
+        parallel_wall=(not front_active) and (right_active) and (not left_active)
+
+        empty_space= (not front_active) and (not right_active) and (not left_active)
+
+
+        thresh=0.3
+        parallel_wall2=((front<3+thresh) and (front > 3-thresh) and (left <.77+thresh) and (left > .77-thresh) and ( right < 1+thresh) and (right > 1-thresh))
+
+
+        if(front_active):
+            robot_state=ROTATING_LEFT
+
+
+     
+        if(robot_state==ROTATING_LEFT):
+            if(empty_space):
+                robot_state=ROTATING_RIGHT          
+
+
+        if((robot_state==ROTATING_RIGHT) and (parallel_wall2)):
+            robot_state=FORWARD
+
+
+
+
 
 
         if(robot_state==FORWARD):
@@ -501,10 +525,13 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
         if(robot_state==ROTATING_RIGHT):
-            vL=-BASE_SPEED
-            vR=BASE_SPEED
+            vL=BASE_SPEED
+            vR=-BASE_SPEED
 
 
+        print("current front reading: "+ str(front)+ "current left reading: " + str(left)+ "current right: " + str(right))
+        print("CURRENT state " + str(robot_state))
+        
 
         vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
         vR = clamp(vR, -MAX_SPEED, MAX_SPEED)
