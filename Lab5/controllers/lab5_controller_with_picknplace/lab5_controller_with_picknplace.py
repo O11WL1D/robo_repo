@@ -492,21 +492,23 @@ while robot.step(timestep) != -1 and mode != 'planner':
         empty_space= (not front_active) and (not right_active) and (not left_active)
 
 
-        thresh=0.3
-        parallel_wall2=((front<3+thresh) and (front > 3-thresh) and (left <.77+thresh) and (left > .77-thresh) and ( right < 1+thresh) and (right > 1-thresh))
-
+        thresh=0.5
+        parallel_wall2=((front<3+thresh) and (front > 3-thresh) and (left <.77+thresh) and (left > .77-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
+        parallel_wall2=((front<3.5+thresh) and (front > 3.5-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
 
         if(front_active):
             robot_state=ROTATING_LEFT
 
 
      
-        if(robot_state==ROTATING_LEFT):
-            if(empty_space):
-                robot_state=ROTATING_RIGHT          
+       # if(robot_state==ROTATING_LEFT):
+        
+        if(empty_space):
+            robot_state=ROTATING_RIGHT          
 
 
-        if((robot_state==ROTATING_RIGHT) and (parallel_wall2)):
+
+        if(parallel_wall2):
             robot_state=FORWARD
 
 
@@ -518,6 +520,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
             vL=BASE_SPEED
             vR=BASE_SPEED
 
+            
         
         if(robot_state==ROTATING_LEFT):
             vL=-BASE_SPEED
