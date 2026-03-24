@@ -485,9 +485,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
         left_active=0
         right_active=0
 
-        left_open=2
-        front_open=2
-        right_open=2
+        left_open=1.5
+        front_open=1.5
+        right_open=1.5
         front_free=0
         left_free=0
         right_free=0
@@ -521,19 +521,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
             right_free=1
 
 
-
-        parallel_wall=(not front_active) and (right_active) and (not left_active)
-
-        empty_space= (not front_active) and (not right_active) and (not left_active)
-
-
-
-        thresh=0.5
-        parallel_wall2=((front<3+thresh) and (front > 3-thresh) and (left <.77+thresh) and (left > .77-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
-        parallel_wall2=((front<3.5+thresh) and (front > 3.5-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
-
         if(front_active):
             robot_state=ROTATING_LEFT
+            angle=90
 
 
         #if(check_wall):
@@ -557,9 +547,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(front_free and left_free):
-            right_timer_start=1
-            angle=150
+        #if(front_free and left_free):
+        #    right_timer_start=1
+         #   angle=150
             
 
         if(front_free and right_free):
