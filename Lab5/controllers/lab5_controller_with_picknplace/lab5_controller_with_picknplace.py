@@ -552,9 +552,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
          #   angle=150
             
 
-        if(front_free and right_free):
-            right_timer_start=1
-            angle=150
+        #if(front_free and right_free):
+        #    right_timer_start=1
+         #   angle=150
             
 
         
@@ -614,7 +614,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             
         
-        if(robot_state==ROTATING_LEFT or robot_state==A90_LEFT or robot_state==A45_LEFT):
+        if(robot_state==ROTATING_LEFT):
             vL=-BASE_SPEED
             vR=BASE_SPEED
 
