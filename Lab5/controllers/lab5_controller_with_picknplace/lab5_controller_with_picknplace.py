@@ -174,6 +174,12 @@ def get_lidar_regions(ranges):
 
 
 
+#states
+FORWARD=1
+ROTATING_LEFT=2
+ROTATING_RIGHT=3
+
+
 
 
 
@@ -437,7 +443,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-            
+
 
     elif mode == 'autonomous':
         #Autonomously explore the entire environment, generate a map, and store the map as an npy file
@@ -459,15 +465,30 @@ while robot.step(timestep) != -1 and mode != 'planner':
         vL = 0.0
         vR = 0.0
 
-        if front < FRONT_TH:
-            vL = TURN_SPEED
-            vR = -TURN_SPEED
-        else:
-            error = WALL_DIST - left
-            correction = KP * error
 
-            vL = BASE_SPEED - correction
-            vR = BASE_SPEED + correction
+        #Condition detection:
+
+        Left_thresh=3
+        Front_thresh=3
+        right_thresh=3
+
+        front_active=0
+        left_active=0
+        right_active=0
+
+
+        if(front>Front_thresh):
+            front_active=1
+
+        if(left>Left_thresh):
+            left_active=1
+
+        if(right>right_thresh):
+            right_active=1
+
+
+
+
 
         vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
         vR = clamp(vR, -MAX_SPEED, MAX_SPEED)
