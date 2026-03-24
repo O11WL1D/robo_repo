@@ -179,7 +179,7 @@ FORWARD=1
 ROTATING_LEFT=2
 ROTATING_RIGHT=3
 
-
+robot_state=FORWARD
 
 
 
@@ -487,6 +487,13 @@ while robot.step(timestep) != -1 and mode != 'planner':
             right_active=1
 
 
+
+        if(robot_state==FORWARD):
+            vL=BASE_SPEED
+            vR=BASE_SPEED
+
+
+        
 
 
 
