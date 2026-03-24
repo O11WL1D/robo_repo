@@ -562,6 +562,11 @@ while robot.step(timestep) != -1 and mode != 'planner':
             angle=150
             
 
+        if(front_free and right_free):
+            right_timer_start=1
+            angle=150
+            
+
         
         #if(right>right_thresh):
          #   robot_state=ROTATING_RIGHT
