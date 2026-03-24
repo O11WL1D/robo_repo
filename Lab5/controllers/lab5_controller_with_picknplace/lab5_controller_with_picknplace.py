@@ -471,13 +471,21 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         #Condition detection:
 
-        Left_thresh=1.0
-        Front_thresh=1.0
-        right_thresh=1.0
+        Left_thresh=1.2
+        Front_thresh=1.2
+        right_thresh=1.2
 
         front_active=0
         left_active=0
         right_active=0
+
+        left_open=2
+        front_open=2
+        right_open=2
+        front_free=0
+        left_free=0
+        right_free=0
+
 
 
         if(front<Front_thresh):
@@ -486,14 +494,32 @@ while robot.step(timestep) != -1 and mode != 'planner':
         if(left<Left_thresh):
             left_active=1
 
+       
+
         if(right<right_thresh):
             right_active=1
+
+
+
+
+         
+        if(left>left_open):
+            left_free=1
+
+ 
+        if(front>front_open):
+            front_free=1
+
+ 
+        if(right>right_open):
+            right_free=1
 
 
 
         parallel_wall=(not front_active) and (right_active) and (not left_active)
 
         empty_space= (not front_active) and (not right_active) and (not left_active)
+
 
 
         thresh=0.5
@@ -507,14 +533,28 @@ while robot.step(timestep) != -1 and mode != 'planner':
      
        # if(robot_state==ROTATING_LEFT):
         
-        if(empty_space):
-            robot_state=ROTATING_RIGHT          
+        #if(empty_space):
+         #   robot_state=ROTATING_RIGHT          
 
 
 
         #if(parallel_wall2):
         #   robot_state=FORWARD
 
+
+
+        if(front_free and left_free and (not right_free)):
+            robot_state=ROTATING_RIGHT 
+
+        if(robot_state==ROTATING_RIGHT):
+        
+            timepassed=timepassed+(current_time-prev_time)
+
+            print(timepassed)
+
+            if(timepassed>100):
+                robot_state=FORWARD
+                timepassed=0
 
         
 
@@ -528,7 +568,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             print(timepassed)
 
-            if(timepassed>430):
+            if(timepassed>500):
                 robot_state=FORWARD
                 timepassed=0
             
@@ -536,7 +576,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         
 
-
+        BASE_SPEED=2
 
         if(robot_state==FORWARD):
             vL=BASE_SPEED
