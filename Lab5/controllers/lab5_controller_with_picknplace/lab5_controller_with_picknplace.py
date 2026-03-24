@@ -559,6 +559,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         if(front_free and left_free):
             right_timer_start=1
+            angle=150
             
 
         
