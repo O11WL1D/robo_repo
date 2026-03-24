@@ -193,12 +193,15 @@ while robot.step(SIM_TIMESTEP) != -1:
     cos_t = math.cos(pose_theta)
     sin_t = math.sin(pose_theta)
     
+
+
     # construct homogenous transformation matrix
     T = np.array([
         [cos_t, -sin_t, pose_x], 
         [-sin_t, -cos_t, pose_y], 
         [0,      0,      1]      
     ])
+    
 
     for i in range(NUM_LIDAR_RAYS):
         rho = lidar_sensor_readings[i]

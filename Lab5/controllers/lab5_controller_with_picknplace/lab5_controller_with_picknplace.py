@@ -78,7 +78,7 @@ lidar_offsets = lidar_offsets[83:len(lidar_offsets)-83] # Only keep lidar readin
 
 ##################### IMPORTANT #####################
 # Set the mode here. Please change to 'autonomous' before submission
-mode = 'manual' # Part 1.1: manual mode
+mode = 'autonomous' # Part 1.1: manual mode
 
 #part 1
 map = np.zeros(shape=[360,360], dtype=float)
@@ -125,6 +125,113 @@ def clear_current_map():
     display.setColor(0x000000)
     display.fillRectangle(0, 0, MAP_SIZE, MAP_SIZE)
     print("Cleared map")
+
+BASE_SPEED = 3.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_lidar_regions(ranges):
+    n = len(ranges)
+
+    front = ranges[n//2 - 20 : n//2 + 20]
+    left  = ranges[int(0.75*n) : int(0.9*n)]
+    right = ranges[int(0.1*n) : int(0.25*n)]
+
+    def clean(vals):
+        vals = [v for v in vals if np.isfinite(v)]
+        return min(vals) if vals else LIDAR_SENSOR_MAX_RANGE
+
+    return {
+        "front": clean(front),
+        "left": clean(left),
+        "right": clean(right)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 while robot.step(timestep) != -1 and mode != 'planner':
 
@@ -207,6 +314,32 @@ while robot.step(timestep) != -1 and mode != 'planner':
  
     # Controllers 
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     if mode == 'manual':
         #Perform teleoperation and obtain a map of the entire environment and store the map as an npy file
         vL = 0.0
@@ -270,10 +403,74 @@ while robot.step(timestep) != -1 and mode != 'planner':
         if clear_pressed:
             clear_current_map()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
     elif mode == 'autonomous':
         #Autonomously explore the entire environment, generate a map, and store the map as an npy file
         vL = 0.0
         vR = 0.0
+
+        regions = get_lidar_regions(lidar_sensor_readings)
+
+        front = regions["front"]
+        left  = regions["left"]
+        right = regions["right"]
+
+        print("current front reading: "+ str(front)+ "current left reading: " + str(left)+ "current right: " + str(right))
+
+        WALL_DIST = 0.6
+        FRONT_TH  = 0.7
+        KP = 3.0
+
+        vL = 0.0
+        vR = 0.0
+
+        if front < FRONT_TH:
+            vL = TURN_SPEED
+            vR = -TURN_SPEED
+        else:
+            error = WALL_DIST - left
+            correction = KP * error
+
+            vL = BASE_SPEED - correction
+            vR = BASE_SPEED + correction
+
+        vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
+        vR = clamp(vR, -MAX_SPEED, MAX_SPEED)
 
     # Odometry code. Don't change vL or vR speeds after this line.
     # We are using GPS and compass for this lab to get a better pose but this is how you'll do the odometry
