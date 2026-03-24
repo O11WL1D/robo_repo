@@ -468,23 +468,25 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         #Condition detection:
 
-        Left_thresh=3
-        Front_thresh=3
-        right_thresh=3
+        Left_thresh=0.25
+        Front_thresh=0.25
+        right_thresh=0.25
 
         front_active=0
         left_active=0
         right_active=0
 
 
-        if(front>Front_thresh):
+        if(front<Front_thresh):
             front_active=1
 
-        if(left>Left_thresh):
+        if(left<Left_thresh):
             left_active=1
 
-        if(right>right_thresh):
+        if(right<right_thresh):
             right_active=1
+
+
 
 
 
@@ -492,8 +494,15 @@ while robot.step(timestep) != -1 and mode != 'planner':
             vL=BASE_SPEED
             vR=BASE_SPEED
 
-
         
+        if(robot_state==ROTATING_LEFT):
+            vL=-BASE_SPEED
+            vR=BASE_SPEED
+
+
+        if(robot_state==ROTATING_RIGHT):
+            vL=-BASE_SPEED
+            vR=BASE_SPEED
 
 
 
