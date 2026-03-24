@@ -133,7 +133,7 @@ BASE_SPEED = 3.0
 
 
 
-
+timethreshright=100
 
 
 
@@ -546,15 +546,30 @@ while robot.step(timestep) != -1 and mode != 'planner':
         if(front_free and left_free and (not right_free)):
             robot_state=ROTATING_RIGHT 
 
+        if(front_free and left_free and (right_free)):
+            robot_state=ROTATING_RIGHT 
+            
+        
+
+
         if(robot_state==ROTATING_RIGHT):
         
+            timethreshright=500
+
+            if(front_free and (not left_free) and (not right_free)):
+                timepassed=0
+                #timethreshright=timethreshright+50
+
+            
+            
             timepassed=timepassed+(current_time-prev_time)
 
             print(timepassed)
 
-            if(timepassed>100):
+            if(timepassed>timethreshright):
                 robot_state=FORWARD
                 timepassed=0
+                #timethreshright=100
 
         
 
