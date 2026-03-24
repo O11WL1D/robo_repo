@@ -70,6 +70,8 @@ vL = 0
 vR = 0
 timepassed=0
 timepassed1=0
+timepassed2=0
+check_wall=0
 
 lidar_sensor_readings = [] # List to hold sensor readings
 lidar_offsets = np.linspace(-LIDAR_ANGLE_RANGE/2., +LIDAR_ANGLE_RANGE/2., LIDAR_ANGLE_BINS)
@@ -133,9 +135,10 @@ BASE_SPEED = 3.0
 
 
 
-timethreshright=100
+timethreshright=500
+timethreshleft=500
 
-
+angle=90
 
 
 
@@ -181,6 +184,7 @@ FORWARD=1
 ROTATING_LEFT=2
 A90_LEFT=5
 A45_LEFT=6
+A45_right=7
 ROTATING_RIGHT=3
 
 robot_state=FORWARD
@@ -529,7 +533,14 @@ while robot.step(timestep) != -1 and mode != 'planner':
         parallel_wall2=((front<3.5+thresh) and (front > 3.5-thresh) and ( right < 1.5+thresh) and (right > 1.5-thresh))
 
         if(front_active):
-            robot_state=A90_LEFT
+            robot_state=ROTATING_LEFT
+
+
+        #if(check_wall):
+         #   robot_state=ROTATING_RIGHT
+          #  check_wall=0
+
+
 
      
        # if(robot_state==ROTATING_LEFT):
@@ -556,11 +567,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
         
             timethreshright=500
 
-            if(front_free and (not left_free) and (not right_free)):
-                timepassed=0
-                #timethreshright=timethreshright+50
-
             
+            timethreshright=(500/90)*angle
+
             
             timepassed=timepassed+(current_time-prev_time)
 
@@ -577,13 +586,18 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(robot_state==A90_LEFT):
+        if(robot_state==ROTATING_LEFT):
             1==1
+
+            timethreshleft=500
+            timethreshright=(500/90)*angle
+
+            
             timepassed=timepassed+(current_time-prev_time)
 
             print(timepassed)
 
-            if(timepassed>500):
+            if(timepassed>timethreshleft):
                 robot_state=FORWARD
                 timepassed=0
             
@@ -599,7 +613,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             
         
-        if(robot_state==ROTATING_LEFT or robot_state==A90_LEFT):
+        if(robot_state==ROTATING_LEFT or robot_state==A90_LEFT or robot_state==A45_LEFT):
             vL=-BASE_SPEED
             vR=BASE_SPEED
 
@@ -618,9 +632,18 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         
         timepassed1=timepassed1+(current_time-prev_time)
+        timepassed2=timepassed2+(current_time-prev_time)
+
+        #basic setup timer
         if(timepassed1<2000):
             vL=0
             vR=0
+            timepassed2=0
+
+
+        if(timepassed2>2000):
+            
+            timepassed2=0
 
 
         prev_time=step_count*timestep
