@@ -526,31 +526,8 @@ while robot.step(timestep) != -1 and mode != 'planner':
             angle=90
 
 
-        #if(check_wall):
-         #   robot_state=ROTATING_RIGHT
-          #  check_wall=0
-
-
-
-     
-       # if(robot_state==ROTATING_LEFT):
-        
-        #if(empty_space):
-         #   robot_state=ROTATING_RIGHT          
-
-
-
-        #if(parallel_wall2):
-        #   robot_state=FORWARD
-
-
-
-
-
-        #if(front_free and left_free):
-        #    right_timer_start=1
-         #   angle=150
-            
+   
+      
 
         #if(front_free and right_free):
         #    right_timer_start=1
@@ -558,10 +535,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
             
 
         
-        #if(right>right_thresh):
-         #   robot_state=ROTATING_RIGHT
-         
-        
+ 
         
 
         if(robot_state==ROTATING_RIGHT):
