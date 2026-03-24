@@ -189,7 +189,7 @@ ROTATING_RIGHT=3
 
 robot_state=FORWARD
 
-
+right_timer_start=0
 
 
 
@@ -558,7 +558,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
         if(front_free and left_free):
-            robot_state=ROTATING_RIGHT 
+            right_timer_start=1
             
 
         
@@ -637,18 +637,26 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         
         timepassed1=timepassed1+(current_time-prev_time)
-        timepassed2=timepassed2+(current_time-prev_time)
+        
 
         #basic setup timer
         if(timepassed1<2000):
             vL=0
             vR=0
+      
+
+
+        if(right_timer_start):
+            timepassed2=timepassed2+(current_time-prev_time)
+            print("right Timer " +str(timepassed2))
+        else:
             timepassed2=0
 
 
-        if(timepassed2>2000):
-            
-            timepassed2=0
+        if(timepassed2>1000):
+            robot_state=ROTATING_RIGHT
+            right_timer_start=0
+
 
 
         prev_time=step_count*timestep
