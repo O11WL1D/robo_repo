@@ -160,8 +160,8 @@ starting_theta=0
 
 deg90=1.047
 
-
-
+deg90= (1.047-0.7854)/2
+deg90= 0.7854+0.1308
 
 
 def angle_diff(a, b):
@@ -583,23 +583,24 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
 
-        if( abs(angle_diff(pose_theta, starting_theta)) > deg90):
-                print("!!!!!!!!!!!!!!STATE TRANSITION ")
-                state_transition=0
-                stabilize_timer_start=1
 
-                if(front_active and left_active and right_active):
-                    robot_state=ROTATING_LEFT
-                    
-                else:
-                    robot_state=FORWARD
-                    
-                vL=0
-                vR=0
+            if( abs(angle_diff(pose_theta, starting_theta)) > deg90):
+                    print("!!!!!!!!!!!!!!STATE TRANSITION ")
+                    state_transition=0
+                    stabilize_timer_start=1
 
-        else:
-                vL=BASE_SPEED
-                vR=-BASE_SPEED
+                    if(front_active and left_active and right_active):
+                        robot_state=ROTATING_LEFT
+                        
+                    else:
+                        robot_state=FORWARD
+                        
+                    vL=0
+                    vR=0
+
+            else:
+                    vL=BASE_SPEED
+                    vR=-BASE_SPEED
 
 
 
@@ -621,7 +622,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
 
-            if(abs(pose_theta-starting_theta)>(deg90)):
+            if(abs(angle_diff(pose_theta, starting_theta))>(deg90)):
                     print("!!!!!!!!!!!!!!STATE TRANSITION ")
                     state_transition=0
                     robot_state=FORWARD
@@ -649,7 +650,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
             print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
 
-            if(abs(pose_theta-starting_theta)>(deg90)):
+            if(abs(angle_diff(pose_theta, starting_theta))>(deg90)):
                 print("!!!!!!!!!!!!!!STATE TRANSITION ")
                 state_transition=0
                 robot_state=FORWARD
