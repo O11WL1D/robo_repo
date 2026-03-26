@@ -158,11 +158,15 @@ starting_theta=0
 
 
 
+deg90=1.047
 
 
 
 
 
+def angle_diff(a, b):
+    d = a - b
+    return (d + math.pi) % (2 * math.pi) - math.pi
 
 
 
@@ -540,7 +544,10 @@ while robot.step(timestep) != -1 and mode != 'planner':
             right_free=1
 
 
-        if(front_active and (not (robot_state==STABLIZE))):
+
+
+        if(front_active and left_active and right_active and (not robot_state==STABLIZE)):
+            print("FRONT ACTIVATED!@@@@@@@@@@@@@@@@@@")
             robot_state=ROTATING_LEFT
             angle=90
 
@@ -555,137 +562,110 @@ while robot.step(timestep) != -1 and mode != 'planner':
          #   angle=150
             
 
-        
+        BASE_SPEED=2
                  
+
+
 
         if(robot_state==STABLIZE):
             
 
             
-            if(sub_robot_state==STABLIZE1):
-                1==1
-
-
-
-
-
-                timethreshright=4500
-                
-
-                BASE_SPEED=2
-                vL=BASE_SPEED
-                vR=-BASE_SPEED
-
-                
-                timepassed=timepassed+(current_time-prev_time)
-
-                print("TIME PASSED " +str(timepassed))
-
-                if(timepassed>timethreshright):
-                    sub_robot_state=2
-                    timepassed=0
-                    #timethreshright=100
-
-
-
-
-
-
-
-
-            if(sub_robot_state==2):
-
-                if(0):
-                    1==1
-
-                else:
-                    robot_state=ROTATING_LEFT
-                    stabilize_timer_start=1
-
-
-                
-
-
-
-                #currentmax=front
-                
-                #print("CURRENTMAX " + str(currentmax))
-                #print("PREVMAX " + str(prevmax))
-                
-                #if(currentmax>prevmax):
+    
                     
-                 #   vL=(BASE_SPEED-1)
-                 #   vR=(BASE_SPEED-1)
-
-                #else:
-                #    vL=0
-                #    vR=0
-        
-
-                #prevmax=currentmax
-
-        
-
-        
-        
-
-
-        
-
-
- 
-        
-
-        if(robot_state==ROTATING_RIGHT):
-        
-          if(state_transition==0):
-            starting_theta=pose_theta
-        state_transition=1
-
-
-        print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
-
-        if(abs(pose_theta-starting_theta)>(1.5708)):
-            state_transition=0
-            robot_state=FORWARD
-            0
-    
-
-    
-        vL=BASE_SPEED
-        vR=-BASE_SPEED
-
-   
-
-        
-
-
-
-        if(robot_state==ROTATING_LEFT):
-            
             if(state_transition==0):
                 starting_theta=pose_theta
+            
+
+
             state_transition=1
 
 
             print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
 
-            if(abs(pose_theta-starting_theta)>(1.5708)):
+        if( abs(angle_diff(pose_theta, starting_theta)) > deg90):
+                print("!!!!!!!!!!!!!!STATE TRANSITION ")
                 state_transition=0
-                robot_state=FORWARD
-                0
-        
-        
-            vL=-BASE_SPEED
-            vR=BASE_SPEED
+                stabilize_timer_start=1
+
+                if(front_active and left_active and right_active):
+                    robot_state=ROTATING_LEFT
+                    
+                else:
+                    robot_state=FORWARD
+                    
+                vL=0
+                vR=0
+
+        else:
+                vL=BASE_SPEED
+                vR=-BASE_SPEED
+
+
 
    
 
 
 
-        BASE_SPEED=2
+        
+
+        if(robot_state==ROTATING_RIGHT):
+        
+            if(state_transition==0):
+                starting_theta=pose_theta
+            
+
+
+            state_transition=1
+
+
+            print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
+
+            if(abs(pose_theta-starting_theta)>(deg90)):
+                    print("!!!!!!!!!!!!!!STATE TRANSITION ")
+                    state_transition=0
+                    robot_state=FORWARD
+                    vL=0
+                    vR=0
+
+            else:
+                vL=-BASE_SPEED
+                vR=BASE_SPEED
+
+   
+
+
+        if(robot_state==ROTATING_LEFT):
+            
+            
+
+            if(state_transition==0):
+            
+                starting_theta=pose_theta
+
+            state_transition=1
+
+
+
+            print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
+
+            if(abs(pose_theta-starting_theta)>(deg90)):
+                print("!!!!!!!!!!!!!!STATE TRANSITION ")
+                state_transition=0
+                robot_state=FORWARD
+                vL=0
+                vR=0
+
+            else:
+                 vL=-BASE_SPEED
+                 vR=BASE_SPEED
+
+        
+        
+        
 
         if(robot_state==FORWARD):
+            state_transition=0
             vL=BASE_SPEED
             vR=BASE_SPEED
 
@@ -698,7 +678,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
         print("current front reading: "+ str(front)+ "current left reading: " + str(left)+ "current right: " + str(right))
-        print("CURRENT state " + str(robot_state))
+        print("CURRENT state " + str(robot_state)+ " Left Active " + str(left_active) + " Front Active " + str(front_active) + " Right active " + str(right_active))
         
 
         vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
@@ -716,7 +696,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
         
 
         #basic setup timer
-        if(timepassed1<2000):
+        if(timepassed1<3000):
             vL=0
             vR=0
             stabilize_timer_start=1
@@ -737,13 +717,17 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(timepassed2>7000):
+        if(timepassed2>10000):
             timepassed2=0
             print("@@@@@@@@@@@@@@@@@ENTERING STABLIZE MODE!")
             robot_state=STABLIZE
             sub_robot_state=1
             stabilize_timer_start=0
+            state_transition=0
             
+
+
+
 
 
         print("POSE THETA: "+str(pose_theta))
