@@ -1,6 +1,7 @@
 from controller import Robot, DistanceSensor, Motor
 from enum import Enum
 
+
 class STATES(Enum):
     STABLIZE=7
     MOVING=8

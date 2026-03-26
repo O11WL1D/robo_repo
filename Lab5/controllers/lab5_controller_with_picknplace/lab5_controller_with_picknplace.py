@@ -3,6 +3,11 @@ from controller import Robot, Motor, Camera, RangeFinder, Lidar, Keyboard
 import math
 import numpy as np
 
+from controller import DistanceSensor
+    
+
+
+
 MAX_SPEED = 7.0  # [rad/s]
 MAX_SPEED_MS = 0.633 # [m/s]
 AXLE_LENGTH = 0.4044 # m
@@ -142,6 +147,10 @@ angle=90
 
 
 
+prevmax=0
+currentmax=0
+
+
 
 
 
@@ -187,13 +196,17 @@ A45_LEFT=6
 A45_right=7
 ROTATING_RIGHT=3
 
+
+STABLIZE=9
+
+STABLIZE1=1
+
+
 robot_state=FORWARD
-
-right_timer_start=0
-
+sub_robot_state=STABLIZE1
 
 
-
+stabilize_timer_start=1
 
 
 
@@ -201,6 +214,11 @@ right_timer_start=0
 
 
 
+
+
+
+def reset_time_passed1():
+    timepassed=0
 
 
 
@@ -521,20 +539,96 @@ while robot.step(timestep) != -1 and mode != 'planner':
             right_free=1
 
 
-        if(front_active):
+        if(front_active and (not (robot_state==STABLIZE))):
             robot_state=ROTATING_LEFT
             angle=90
 
 
    
+
+
       
 
         #if(front_free and right_free):
-        #    right_timer_start=1
+        #    stabilize_timer_start=1
          #   angle=150
             
 
         
+                 
+
+        if(robot_state==STABLIZE):
+            
+
+            
+            if(sub_robot_state==STABLIZE1):
+                1==1
+
+
+
+
+
+                timethreshright=500
+                timethreshright=(500/90)*angle
+
+                BASE_SPEED=2
+                vL=BASE_SPEED
+                vR=-BASE_SPEED
+
+                
+                timepassed=timepassed+(current_time-prev_time)
+
+                print("TIME PASSED " +str(timepassed))
+
+                if(timepassed>timethreshright):
+                    sub_robot_state=2
+                    timepassed=0
+                    #timethreshright=100
+
+
+
+
+
+            if(sub_robot_state==2):
+
+                if(0):
+                    1==1
+
+                else:
+                    robot_state=ROTATING_LEFT
+                    stabilize_timer_start=1
+
+
+                
+
+
+
+                #currentmax=front
+                
+                #print("CURRENTMAX " + str(currentmax))
+                #print("PREVMAX " + str(prevmax))
+                
+                #if(currentmax>prevmax):
+                    
+                 #   vL=(BASE_SPEED-1)
+                 #   vR=(BASE_SPEED-1)
+
+                #else:
+                #    vL=0
+                #    vR=0
+        
+
+                #prevmax=currentmax
+
+        
+
+        
+        
+
+
+        
+
+
  
         
 
@@ -557,8 +651,6 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         
 
-        
-
 
 
         if(robot_state==ROTATING_LEFT):
@@ -577,8 +669,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
                 timepassed=0
             
 
+   
 
-        
+
 
         BASE_SPEED=2
 
@@ -586,7 +679,6 @@ while robot.step(timestep) != -1 and mode != 'planner':
             vL=BASE_SPEED
             vR=BASE_SPEED
 
-            
         
         if(robot_state==ROTATING_LEFT):
             vL=-BASE_SPEED
@@ -598,6 +690,8 @@ while robot.step(timestep) != -1 and mode != 'planner':
             vR=-BASE_SPEED
 
 
+
+
         print("current front reading: "+ str(front)+ "current left reading: " + str(left)+ "current right: " + str(right))
         print("CURRENT state " + str(robot_state))
         
@@ -605,6 +699,13 @@ while robot.step(timestep) != -1 and mode != 'planner':
         vL = clamp(vL, -MAX_SPEED, MAX_SPEED)
         vR = clamp(vR, -MAX_SPEED, MAX_SPEED)
 
+
+
+
+
+
+
+        
         
         timepassed1=timepassed1+(current_time-prev_time)
         
@@ -616,16 +717,27 @@ while robot.step(timestep) != -1 and mode != 'planner':
       
 
 
-        if(right_timer_start):
+
+
+
+        if(stabilize_timer_start):
             timepassed2=timepassed2+(current_time-prev_time)
-            print("right Timer " +str(timepassed2))
-        else:
+            print("stabilize Timer " +str(timepassed2))
+    
+            
+
+
+
+
+
+
+        if(timepassed2>8000):
             timepassed2=0
+            print("@@@@@@@@@@@@@@@@@ENTERING STABLIZE MODE!")
+            robot_state=STABLIZE
+            stabilize_timer_start=0
 
 
-        if(timepassed2>1000):
-            robot_state=ROTATING_RIGHT
-            right_timer_start=0
 
 
 
