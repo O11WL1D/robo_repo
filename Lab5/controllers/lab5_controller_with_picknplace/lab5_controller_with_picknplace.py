@@ -152,8 +152,9 @@ currentmax=0
 
 
 
+state_transition=0
 
-
+starting_theta=0
 
 
 
@@ -206,7 +207,7 @@ robot_state=FORWARD
 sub_robot_state=STABLIZE1
 
 
-stabilize_timer_start=1
+stabilize_timer_start=0
 
 
 
@@ -568,8 +569,8 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-                timethreshright=500
-                timethreshright=(500/90)*angle
+                timethreshright=4500
+                
 
                 BASE_SPEED=2
                 vL=BASE_SPEED
@@ -584,6 +585,9 @@ while robot.step(timestep) != -1 and mode != 'planner':
                     sub_robot_state=2
                     timepassed=0
                     #timethreshright=100
+
+
+
 
 
 
@@ -634,40 +638,46 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
         if(robot_state==ROTATING_RIGHT):
         
-            timethreshright=500
+          if(state_transition==0):
+            starting_theta=pose_theta
+        state_transition=1
 
-            
-            timethreshright=(500/90)*angle
 
-            
-            timepassed=timepassed+(current_time-prev_time)
+        print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
 
-            print(timepassed)
+        if(abs(pose_theta-starting_theta)>(1.5708)):
+            state_transition=0
+            robot_state=FORWARD
+            0
+    
 
-            if(timepassed>timethreshright):
-                robot_state=FORWARD
-                timepassed=0
-                #timethreshright=100
+    
+        vL=BASE_SPEED
+        vR=-BASE_SPEED
+
+   
 
         
 
 
 
         if(robot_state==ROTATING_LEFT):
-            1==1
-
-            timethreshleft=500
-            timethreshright=(500/90)*angle
-
             
-            timepassed=timepassed+(current_time-prev_time)
+            if(state_transition==0):
+                starting_theta=pose_theta
+            state_transition=1
 
-            print(timepassed)
 
-            if(timepassed>timethreshleft):
+            print("THETA DIFFERENCE: "+str(pose_theta-starting_theta))
+
+            if(abs(pose_theta-starting_theta)>(1.5708)):
+                state_transition=0
                 robot_state=FORWARD
-                timepassed=0
-            
+                0
+        
+        
+            vL=-BASE_SPEED
+            vR=BASE_SPEED
 
    
 
@@ -679,15 +689,10 @@ while robot.step(timestep) != -1 and mode != 'planner':
             vL=BASE_SPEED
             vR=BASE_SPEED
 
+
+
+
         
-        if(robot_state==ROTATING_LEFT):
-            vL=-BASE_SPEED
-            vR=BASE_SPEED
-
-
-        if(robot_state==ROTATING_RIGHT):
-            vL=BASE_SPEED
-            vR=-BASE_SPEED
 
 
 
@@ -714,6 +719,7 @@ while robot.step(timestep) != -1 and mode != 'planner':
         if(timepassed1<2000):
             vL=0
             vR=0
+            stabilize_timer_start=1
       
 
 
@@ -731,14 +737,16 @@ while robot.step(timestep) != -1 and mode != 'planner':
 
 
 
-        if(timepassed2>8000):
+        if(timepassed2>7000):
             timepassed2=0
             print("@@@@@@@@@@@@@@@@@ENTERING STABLIZE MODE!")
             robot_state=STABLIZE
+            sub_robot_state=1
             stabilize_timer_start=0
+            
 
 
-
+        print("POSE THETA: "+str(pose_theta))
 
 
         prev_time=step_count*timestep
