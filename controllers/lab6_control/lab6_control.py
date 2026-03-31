@@ -127,9 +127,9 @@ def forward_kinematics(q):
     """
 
     #dh1=_dh(q[0],q[1],q[2],q[3])
+    #wrong ಠ_ಠ
 
-
-    
+    #np eye creates a 4x4 identity matrix
     T = np.eye(4)
 
     
@@ -139,6 +139,7 @@ def forward_kinematics(q):
         alpha = UR5E_DH_ALPHA[i]
         theta = q[i]
 
+        #this multiplies the current matrix T with the transform containing the new parameters a, d, alpa, theta.
         T = T @ _dh(a, d, alpha, theta)
 
     
