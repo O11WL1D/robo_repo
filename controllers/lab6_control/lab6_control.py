@@ -164,6 +164,8 @@ def forward_kinematics(q):
 # ============================================================
 # TASK 2: Numerical Jacobian (15 pts)
 # ============================================================
+
+
 def compute_jacobian(q, delta=1e-5):
     """
     Compute the 3x6 position Jacobian using central finite differences.
@@ -176,7 +178,30 @@ def compute_jacobian(q, delta=1e-5):
         J : numpy array (3, 6)
     """
     # TODO: Implement (~8-10 lines)
+
+
+    for i in range(6):
+        a = UR5E_DH_A[i]
+        d = UR5E_DH_D[i]
+        alpha = UR5E_DH_ALPHA[i]
+        theta = q[i]
+
+        a_p_pert=a+delta
+        d_p_pert=d+delta
+        alpha_p_pert=alpha+delta
+        theta_p_pert=theta+delta
+
+        a_n_pert=a+delta
+        d_n_pert=d+delta
+        alpha_n_pert=alpha+delta
+        theta_n_pert=theta+delta
+
+
+
+
     raise NotImplementedError("TODO: Implement compute_jacobian()")
+
+
 
 
 # ============================================================
