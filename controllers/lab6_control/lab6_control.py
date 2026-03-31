@@ -196,7 +196,9 @@ def compute_jacobian(q, delta=1e-5):
 
     forward_p_pert=forward_kinematics(q_p_pert)
     forward_n_pert=forward_kinematics(q_n_pert)
+    result=(forward_p_pert-forward_n_pert)/(2*delta)
 
+    #implemented wrong, I'll be back to work on this later. 
 
 
     raise NotImplementedError("TODO: Implement compute_jacobian()")
