@@ -166,6 +166,7 @@ def forward_kinematics(q):
 # ============================================================
 
 
+
 def compute_jacobian(q, delta=1e-5):
     """
     Compute the 3x6 position Jacobian using central finite differences.
@@ -180,22 +181,21 @@ def compute_jacobian(q, delta=1e-5):
     # TODO: Implement (~8-10 lines)
 
 
+    q_p_pert=[0] * 6 
+    q_n_pert=[0] * 6 
     for i in range(6):
-        a = UR5E_DH_A[i]
-        d = UR5E_DH_D[i]
-        alpha = UR5E_DH_ALPHA[i]
+
         theta = q[i]
+        theta_p_pert=q[i]+delta
+        theta_n_pert=q[i]-delta
+        
+        q_p_pert[i]=theta_p_pert
+        q_n_pert[i]=theta_n_pert
 
-        a_p_pert=a+delta
-        d_p_pert=d+delta
-        alpha_p_pert=alpha+delta
-        theta_p_pert=theta+delta
 
-        a_n_pert=a+delta
-        d_n_pert=d+delta
-        alpha_n_pert=alpha+delta
-        theta_n_pert=theta+delta
 
+    forward_p_pert=forward_kinematics(q_p_pert)
+    forward_n_pert=forward_kinematics(q_n_pert)
 
 
 
