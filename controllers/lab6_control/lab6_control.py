@@ -111,16 +111,49 @@ def base_to_world(pb):
 def forward_kinematics(q):
 
 
+
     """
     Compute the gripper tip position given joint angles.
 
     Parameters:
         q : array-like, 6 joint angles (radians)
 
+    
+    
+
+
     Returns:
         position : numpy array [x, y, z] in robot base frame
     """
-    raise NotImplementedError("TODO: Implement forward_kinematics()")
+
+    #dh1=_dh(q[0],q[1],q[2],q[3])
+
+
+    
+    T = np.eye(4)
+
+    
+    for i in range(6):
+        a = UR5E_DH_A[i]
+        d = UR5E_DH_D[i]
+        alpha = UR5E_DH_ALPHA[i]
+        theta = q[i]
+
+        T = T @ _dh(a, d, alpha, theta)
+
+    
+    T_offset = np.eye(4)
+    T_offset[2, 3] = GRIPPER_OFFSET
+
+    T = T @ T_offset
+
+    
+    position = T[:3, 3]
+
+    return position
+
+    #raise NotImplementedError("TODO: Implement forward_kinematics()")
+
 
 
 
