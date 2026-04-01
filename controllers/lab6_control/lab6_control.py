@@ -181,27 +181,37 @@ def compute_jacobian(q, delta=1e-5):
     # TODO: Implement (~8-10 lines)
 
 
-    q_p_pert=[0] * 6 
-    q_n_pert=[0] * 6 
+    J = np.zeros((3, 6))  # 3 rows (x,y,z), 6 joints
+
+    q_pos = np.copy(q)
+    
+    q_neg = np.copy(q)
+
+
+
     for i in range(6):
-
-        theta = q[i]
-        theta_p_pert=q[i]+delta
-        theta_n_pert=q[i]-delta
         
-        q_p_pert[i]=theta_p_pert
-        q_n_pert[i]=theta_n_pert
+  
+       
+        q_pos[i]= q_pos[i] +delta
+        q_neg[i] = q_neg[i] - delta
 
 
 
-    forward_p_pert=forward_kinematics(q_p_pert)
-    forward_n_pert=forward_kinematics(q_n_pert)
-    result=(forward_p_pert-forward_n_pert)/(2*delta)
+      
+        f_pos = forward_kinematics(q_pos)
 
-    #implemented wrong, I'll be back to work on this later. 
+        f_neg = forward_kinematics(q_neg)
+
+        # Central difference
+        J[:, i] = (f_pos - f_neg) / (2 * delta)
+
+    return J
+
 
 
     raise NotImplementedError("TODO: Implement compute_jacobian()")
+
 
 
 
