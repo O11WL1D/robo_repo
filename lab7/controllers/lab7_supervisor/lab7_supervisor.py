@@ -26,6 +26,8 @@ if pr2 is None:
 if obj1 is None:
     raise RuntimeError("obj1 DEF not found")
 
+#print(obj1)
+#object exists
 
 pr2_trans = pr2.getField("translation")
 pr2_rot = pr2.getField("rotation")

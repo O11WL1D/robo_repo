@@ -667,10 +667,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 #Do not modify the main
 def main():
+    print("main started")
     pr2 = PR2Controller()
     env = load_environment_map()
 
     objects    = env.get("pick_objects",    {})
+    print("now printing objects")
+    print(objects)
     nav_goals  = env.get("navigation_goals", {})
     place_zone = env.get("place_zone",      {})
 
