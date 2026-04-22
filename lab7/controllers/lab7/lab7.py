@@ -2,6 +2,7 @@ import json, math, os
 import numpy as np
 from controller import Robot
 
+
 # ══════════════════════════════════════════════════════════════════════════════
 # PR2 ARM KINEMATICS  (do not modify)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -230,7 +231,7 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
         #yaw_error = angle_diff(goal_angle, robot_yaw)
 
         
-        return np.array([left_min, right_min], dtype=float)
+        return np.array([left_min/100, right_min/100], dtype=float)
 
 
         
@@ -816,7 +817,7 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 #Gavin Code
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
-
+    
     
     
 
@@ -908,15 +909,17 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             x2=result2[0]
             y2=result2[1]
 
-            goal_angle=goal_angle+x2+y2
+            #goal_angle=goal_angle+x2+y2
 
-            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
             
-
-
-            if(abs(yaw_error)<0.01):
+   
+            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
+           
+            if(abs(yaw_error)<0.02):
                 print("NOW DRIVING ")
+                
                 pr2.set_wheel_speeds(MAX_WHEEL_SPEED,MAX_WHEEL_SPEED)
+
             else:
 
                 pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
