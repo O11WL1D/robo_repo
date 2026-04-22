@@ -413,7 +413,7 @@ class PR2Controller:
             if not (math.isnan(r) or math.isinf(r)) and 0.05 < r < 0.25:
                 self._collision_count += 1
                 break   # count once per step
-        print("PR2 checkpoint 8")
+        
 
     def get_collision_count(self):
         """Returns total collision count (used for grading penalty)."""
