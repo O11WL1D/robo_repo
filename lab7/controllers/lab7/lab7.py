@@ -674,10 +674,14 @@ def main():
     print("main started")
     pr2 = PR2Controller()
 
+    #currently this checkpoint is never reached so there is something wrong with pr2
     print("main checkpoint 1")
+
     env = None
     load_environment_map()
     load_environment_map()
+    #this 
+    print("main checkpoint 1")
 
     objects    = env.get("pick_objects",    {})
     print("now printing objects")
