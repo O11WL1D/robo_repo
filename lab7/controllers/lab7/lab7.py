@@ -618,6 +618,37 @@ def load_environment_map():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def report(pr2,dist, front, left, right ):
+    print("Current x and y pose: " + str(pr2.get_pose()))
+    print("Dist: " +str(dist))
+    print("lidar front, left, right : " +str(front) + " " + str(left) + " " + str(right) )
+
+
+
+
+
+
+
+
+
 #TODO 8
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
@@ -631,9 +662,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     for _ in range(max_steps):
         robot_x, robot_y, robot_yaw = pr2.get_pose()
 
+        
+
         dx = goal_x - robot_x
         dy = goal_y - robot_y
         dist = math.hypot(dx, dy)
+
+        
 
         if dist < pos_tol:
             break
@@ -643,6 +678,9 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         front_min = float("inf")
         left_min = float("inf")
         right_min = float("inf")
+
+
+        report(pr2,dist,front_min,left_min,right_min)
 
         if lidar_ranges:
             n = len(lidar_ranges)
@@ -702,6 +740,27 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
 
     pr2.stop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #Do not modify the main
 def main():
