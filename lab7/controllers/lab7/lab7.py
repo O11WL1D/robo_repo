@@ -676,6 +676,7 @@ def main():
 
     # ── Pick OBJECT_1 ─────────────────────────────────────────────────────────
     if "OBJECT_1" in objects:
+        print("OBJECT 1 DETECTED")
         g1 = nav_goals["OBJECT_1"]
         navigate_to_goal(pr2, g1["position"][0], g1["position"][1],
                          g1["yaw_radians"], env)

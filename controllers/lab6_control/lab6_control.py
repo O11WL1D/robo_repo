@@ -183,14 +183,14 @@ def compute_jacobian(q, delta=1e-5):
 
     J = np.zeros((3, 6))  # 3 rows (x,y,z), 6 joints
 
-    q_pos = np.copy(q)
-    
-    q_neg = np.copy(q)
+  
 
 
 
     for i in range(6):
         
+        q_pos = np.copy(q)
+        q_neg = np.copy(q)
   
        
         q_pos[i]= q_pos[i] +delta

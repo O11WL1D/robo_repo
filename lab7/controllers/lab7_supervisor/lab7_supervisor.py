@@ -21,6 +21,12 @@ place_table = robot.getFromDef("place_table")
 if pr2 is None:
     raise RuntimeError("PR2 DEF not found")
 
+
+
+if obj1 is None:
+    raise RuntimeError("obj1 DEF not found")
+
+
 pr2_trans = pr2.getField("translation")
 pr2_rot = pr2.getField("rotation")
 
@@ -39,6 +45,7 @@ def write_environment_map():
         "navigation_goals": {},
         "place_zone": {}
     }
+
 
     if obj1 is not None:
         p = obj1.getField("translation").getSFVec3f()
