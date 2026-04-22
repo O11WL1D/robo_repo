@@ -637,6 +637,7 @@ def load_environment_map():
 
 
 def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
+    print("---------------------------------------------------NEW REPORT")
     print("Current x and y pose: " + str(pr2.get_pose()))
     print("Dist: " +str(dist))
     print("lidar front, left, right : " +str(front) + " " + str(left) + " " + str(right) )
