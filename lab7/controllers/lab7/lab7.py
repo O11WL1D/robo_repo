@@ -329,7 +329,7 @@ class PR2Controller:
         self._tors= G("torso_lift_joint_sensor")
         self._imu = G("imu_sensor")
         self._lid = G("base_laser")
-        print("PR2 checkpoint 2")
+        print("Device setup ran")
 
     
     def _enable_devices(self):
@@ -346,7 +346,7 @@ class PR2Controller:
         if self._lid: self._lid.enable(ts)
         if self._rcl: self._rcl.enable(ts)
         if self._rcr: self._rcr.enable(ts)
-        print("PR2 checkpoint 3")
+        print("Device enable ran")
 
     # ── Simulation step ───────────────────────────────────────────────────────
     
