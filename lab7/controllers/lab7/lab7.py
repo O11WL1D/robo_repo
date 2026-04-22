@@ -712,7 +712,8 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
         report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, 1,1,1)
 
-
+        #looks like up until checkpoint1 the robot
+        #rotates to face depot table. 
         if front_min < 0.75:
             if left_min > right_min:
                 pr2.rotate_in_place(0.45)
@@ -721,7 +722,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             continue
         
 
-
+        #checkpoint1
         if(0):
 
             if abs(yaw_error) > 0.35:
