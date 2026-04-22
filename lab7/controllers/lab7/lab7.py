@@ -198,6 +198,50 @@ def compute_potential_field(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lida
     return np.array([fx, fy], dtype=float)
 
 
+
+
+def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
+
+    
+        def angle_diff(a, b):
+            d = a - b
+            return (d + math.pi) % (2 * math.pi) - math.pi
+
+
+        n = len(lidar_ranges)
+        c = n // 2
+
+        front_vals = [r for r in lidar_ranges[max(0, c - n // 14):min(n, c + n // 14 + 1)]
+                        if not (math.isnan(r) or math.isinf(r))]
+        left_vals = [r for r in lidar_ranges[min(n - 1, c + n // 10):min(n, c + n // 4)]
+                        if not (math.isnan(r) or math.isinf(r))]
+        right_vals = [r for r in lidar_ranges[max(0, c - n // 4):max(0, c - n // 10)]
+                        if not (math.isnan(r) or math.isinf(r))]
+
+
+        if front_vals:
+            front_min = min(front_vals)
+        if left_vals:
+            left_min = min(left_vals)
+        if right_vals:
+            right_min = min(right_vals)
+
+        #goal_angle = math.atan2(dy, dx)
+        #yaw_error = angle_diff(goal_angle, robot_yaw)
+
+        
+        return np.array([left_min, right_min], dtype=float)
+
+
+        
+
+
+        
+
+
+
+
+
 #TODO Implement 5 
 def pick_object(pr2, obj_data):
     robot_x, robot_y, robot_yaw = pr2.get_pose()
@@ -636,7 +680,7 @@ def load_environment_map():
 
 
 
-def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
+def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5,range6,range7 ):
     print("---------------------------------------------------NEW REPORT")
     print("Current x and y pose: " + str(pr2.get_pose()))
     print("Dist: " +str(dist))
@@ -646,21 +690,23 @@ def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
     print("front min "+ str(range3))
     print("left min "+ str(range4))
     print("right min "+ str(range5))
+    print("dx "+ str(range6))
+    print("dy"+ str(range7))
 
 
 
 
+
+
+#def calculate_fields_object_1(pr2):
 
 
 
 
 
 #TODO 8
-#mostly unedited
-#env_map isnt used/ we should be utilizing potential fields
-#to navigate -> lab 5 material.
-
-def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
+#juan code
+def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
     max_steps = 2000
@@ -763,9 +809,11 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 
 
+
+
 #TODO 8
-#edited version
-def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
+#Gavin Code
+def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
     max_steps = 2000
@@ -817,10 +865,11 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
                 right_min = min(right_vals)
 
         goal_angle = math.atan2(dy, dx)
+        
         yaw_error = angle_diff(goal_angle, robot_yaw)
 
 
-        report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min)
+        
 
   
         
@@ -828,12 +877,30 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
         #checkpoint1
         if(1):
 
-  
+            
+            #determine dxdy
 
+            result=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+            result2=compute_potential_field2(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+            dx=result[0]
+            dy=result[1]
+
+
+            #compute_potential_field2 is literially just adding the min left and min right values 
+            #to the goal angle -> adds in a sort of potential field, things closer will repulse the 
+            #
+
+            x2=result2[0]
+            y2=result2[1]
+
+            goal_angle=goal_angle+x2+y2
+
+            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy)
+            
 
 
  
-            #pr2.set_wheel_speeds(MAX_WHEEL_SPEED, MAX_WHEEL_SPEED)
+            pr2.set_wheel_speeds(dx, dy)
 
             pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
 
