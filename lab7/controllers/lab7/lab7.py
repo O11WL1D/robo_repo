@@ -903,7 +903,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
             #compute_potential_field2 is literially just adding the min left and min right values 
             #to the goal angle -> adds in a sort of potential field, things closer will repulse the 
-            #
+            #robot angle away. 
 
             x2=result2[0]
             y2=result2[1]
@@ -914,10 +914,12 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             
 
 
- 
-            pr2.set_wheel_speeds(dx, dy)
+            if(abs(yaw_error)<0.01):
+                print("NOW DRIVING ")
+                pr2.set_wheel_speeds(MAX_WHEEL_SPEED,MAX_WHEEL_SPEED)
+            else:
 
-            pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+                pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
 
       
 
