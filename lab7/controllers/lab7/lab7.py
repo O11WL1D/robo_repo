@@ -680,9 +680,10 @@ def load_environment_map():
 
 
 
-def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5,range6,range7 ):
+def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5,range6,range7,goal_x,goal_y ):
     print("---------------------------------------------------NEW REPORT")
-    print("Current x and y pose: " + str(pr2.get_pose()))
+    print("Current x and y pose: " + str(pr2.get_pose()) )
+    print("Goal x and y pose: " +str(goal_x) + str(goal_y) )
     print("Dist: " +str(dist))
     print("lidar front, left, right : " +str(front) + " " + str(left) + " " + str(right) )
     print("goal angle "+ str(range1))
@@ -814,6 +815,12 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 #TODO 8
 #Gavin Code
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
+
+
+    
+    
+
+
     pos_tol = 0.28
     yaw_tol = 0.18
     max_steps = 2000
@@ -825,7 +832,17 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     for _ in range(max_steps):
         robot_x, robot_y, robot_yaw = pr2.get_pose()
 
+
+
+        #potential field method 2, navigate to current pose+ dx and +dy until goal position actually reached.
+        #result=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+        #dx=result[0]
+        #dy=result[1]
+        #goal_x=robot_x+dx
+        #goal_y=robot_y+dy
+
         
+            
 
         dx = goal_x - robot_x
         dy = goal_y - robot_y
@@ -879,12 +896,10 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
             
             #determine dxdy
-
-            result=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+            #not sure whats going on here but this doesnt
+            
             result2=compute_potential_field2(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
-            dx=result[0]
-            dy=result[1]
-
+          
 
             #compute_potential_field2 is literially just adding the min left and min right values 
             #to the goal angle -> adds in a sort of potential field, things closer will repulse the 
@@ -895,7 +910,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
             goal_angle=goal_angle+x2+y2
 
-            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy)
+            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
             
 
 
