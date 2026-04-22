@@ -636,10 +636,11 @@ def load_environment_map():
 
 
 
-def report(pr2,dist, front, left, right ):
+def report(pr2,dist, front, left, right,range ):
     print("Current x and y pose: " + str(pr2.get_pose()))
     print("Dist: " +str(dist))
     print("lidar front, left, right : " +str(front) + " " + str(left) + " " + str(right) )
+    print("ranges "+ str(range))
 
 
 
@@ -680,7 +681,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         right_min = float("inf")
 
 
-        report(pr2,dist,front_min,left_min,right_min)
+        report(pr2,dist,front_min,left_min,right_min, 1)
 
         if lidar_ranges:
             n = len(lidar_ranges)
