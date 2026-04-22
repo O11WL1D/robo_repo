@@ -274,7 +274,9 @@ class PR2Controller:
 
     # ── Construction ──────────────────────────────────────────────────────────
 
+    
     def __init__(self):
+        
         self.robot = Robot()
         self.ts    = int(self.robot.getBasicTimeStep())
 
@@ -293,9 +295,10 @@ class PR2Controller:
         self.open_gripper(right=True)
         self.open_gripper(right=False)
         self.set_torso(0.33)
+        print("PR2 checkpoint 1")
 
     # ── Device setup (internal) ───────────────────────────────────────────────
-
+    
     def _setup_devices(self):
         G = self.robot.getDevice
         self._wm = [G(n) for n in [
@@ -326,7 +329,9 @@ class PR2Controller:
         self._tors= G("torso_lift_joint_sensor")
         self._imu = G("imu_sensor")
         self._lid = G("base_laser")
+        print("PR2 checkpoint 2")
 
+    
     def _enable_devices(self):
         ts = self.ts
         for s in self._ws:
@@ -341,18 +346,22 @@ class PR2Controller:
         if self._lid: self._lid.enable(ts)
         if self._rcl: self._rcl.enable(ts)
         if self._rcr: self._rcr.enable(ts)
+        print("PR2 checkpoint 3")
 
     # ── Simulation step ───────────────────────────────────────────────────────
-
+    
     def step(self):
         """Advance simulation by one time step. Returns False when sim ends."""
         alive = self.robot.step(self.ts) != -1
+        
         if alive:
             self._check_collision()
+      
         return alive
+        
 
     # ── Pose (supervisor-corrected) ───────────────────────────────────────────
-
+    
     def get_pose(self):
         """
         Return (x, y, yaw) in world frame.
@@ -370,12 +379,15 @@ class PR2Controller:
             except Exception:
                 pass
         # IMU fallback for yaw
+        
         if self._imu:
             self._yaw = self._imu.getRollPitchYaw()[2]
+   
         return self._x, self._y, self._yaw
+        
 
     # ── Lidar ─────────────────────────────────────────────────────────────────
-
+    
     def get_lidar(self):
         """
         Return (ranges, fov) from the base laser.
@@ -384,10 +396,12 @@ class PR2Controller:
         """
         if not self._lid:
             return [], 0.0
+      
         return self._lid.getRangeImage(), self._lid.getFov()
 
     # ── Collision counting ────────────────────────────────────────────────────
 
+   
     def _check_collision(self):
         if not self._lid: return
         ranges = self._lid.getRangeImage()
@@ -399,13 +413,15 @@ class PR2Controller:
             if not (math.isnan(r) or math.isinf(r)) and 0.05 < r < 0.25:
                 self._collision_count += 1
                 break   # count once per step
+        print("PR2 checkpoint 8")
 
     def get_collision_count(self):
         """Returns total collision count (used for grading penalty)."""
+      
         return self._collision_count
 
     # ── Wheel control ─────────────────────────────────────────────────────────
-
+ 
     def set_wheel_speeds(self, left_speed, right_speed):
         """
         Set differential drive wheel velocities (rad/s).
