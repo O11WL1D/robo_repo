@@ -288,14 +288,19 @@ class PR2Controller:
 
         self._setup_devices()
         self._enable_devices()
-
+        print("PR2 checkpoint 1/6")
         # Initial safe pose
         self.set_right_arm([0., 1.35, 0., -2.2, 0.])
+        print("PR2 checkpoint 2/6")
         self.set_left_arm( [0., 1.35, 0., -2.2, 0.])
+        print("PR2 checkpoint 3/6")
         self.open_gripper(right=True)
+        print("PR2 checkpoint 4/6")
         self.open_gripper(right=False)
+        print("PR2 checkpoint 5/6")
         self.set_torso(0.33)
-        print("PR2 checkpoint 1")
+        print("PR2 checkpoint 6/6")
+        
 
     # ── Device setup (internal) ───────────────────────────────────────────────
     
@@ -556,6 +561,9 @@ class PR2Controller:
                 if not self.step(): return
                 if all(s is None or abs(s.getValue() - float(a)) < 0.05
                        for s, a in zip(sensors, q)): break
+
+
+
 
     def _set_casters(self, fl, fr, bl, br, wait=True):
         T = [fl, fr, bl, br]
