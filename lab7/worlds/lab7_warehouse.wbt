@@ -1,0 +1,209 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/clearpath/pr2/protos/Pr2.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/tables/protos/Table.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/drinks/protos/Can.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/kitchen/breakfast/protos/BiscuitBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/BrushedAluminium.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Roughcast.proto"
+
+WorldInfo {
+  title "Lab 7 — PR2 Warehouse Pick and Place"
+}
+Viewpoint {
+  orientation -0.3521771735366675 0.2385557068361488 0.9050206700267289 2.054151223022291
+  position 3 -16 16
+}
+TexturedBackground {
+  texture "empty_office"
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 14 14
+  tileSize 1 1
+  appearance Parquetry {
+  }
+}
+Solid {
+  translation 0 7 1.25
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 14 0.2 2.5
+      }
+    }
+  ]
+  name "wall_n"
+  boundingObject Box {
+    size 14 0.2 2.5
+  }
+  locked TRUE
+}
+Solid {
+  translation 0 -7 1.25
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 14 0.2 2.5
+      }
+    }
+  ]
+  name "wall_s"
+  boundingObject Box {
+    size 14 0.2 2.5
+  }
+  locked TRUE
+}
+Solid {
+  translation -7 0 1.25
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 0.2 14 2.5
+      }
+    }
+  ]
+  name "wall_w"
+  boundingObject Box {
+    size 0.2 14 2.5
+  }
+  locked TRUE
+}
+Solid {
+  translation 7 0 1.25
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 0.2 14 2.5
+      }
+    }
+  ]
+  name "wall_e"
+  boundingObject Box {
+    size 0.2 14 2.5
+  }
+  locked TRUE
+}
+Table {
+  translation -3 -4 0
+  name "pick_table_1"
+}
+DEF OBJECT_1 BiscuitBox {
+  translation -3 -3.3 0.77
+}
+Table {
+  translation 3 -4 0
+  name "pick_table_2"
+}
+DEF OBJECT_2 Can {
+  translation 3 -3.3 0.805
+}
+Table {
+  translation 0 5 0
+  name "place_table"
+}
+SolidBox {
+  translation -2 0 0.5
+  name "obs1"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+SolidBox {
+  translation 2 0 0.5
+  name "obs2"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+SolidBox {
+  translation -3.5 -1.5 0.5
+  name "obs3"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+SolidBox {
+  translation 0 -1.5 0.5
+  name "obs4"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+SolidBox {
+  translation 3.5 -1.5 0.5
+  name "obs5"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+SolidBox {
+  translation 0 -2.8 0.5
+  name "obs6"
+  size 0.6 0.6 1
+  appearance BrushedAluminium {
+  }
+}
+Solid {
+  translation 5 1 0.75
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 0.2 6 1.5
+      }
+    }
+  ]
+  name "wall_inner_e"
+  boundingObject Box {
+    size 0.2 6 1.5
+  }
+  locked TRUE
+}
+Solid {
+  translation -5 1 0.75
+  children [
+    Shape {
+      appearance Roughcast {
+      }
+      geometry Box {
+        size 0.2 6 1.5
+      }
+    }
+  ]
+  name "wall_inner_w"
+  boundingObject Box {
+    size 0.2 6 1.5
+  }
+  locked TRUE
+}
+Robot {
+  children [
+    Emitter {
+      channel 1
+    }
+  ]
+  name "lab7_supervisor"
+  controller "lab7_supervisor"
+  supervisor TRUE
+}
+DEF PR2 Pr2 {
+  translation 0 1 0
+  rotation 0 0 1 -1.5708
+  controller "lab7"
+}
