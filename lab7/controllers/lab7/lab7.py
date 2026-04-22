@@ -655,7 +655,7 @@ def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
 
 
 #TODO 8
-def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
+def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
     max_steps = 2000
@@ -710,7 +710,7 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
         yaw_error = angle_diff(goal_angle, robot_yaw)
 
 
-        report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_vals,left_vals,right_vals)
+        report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, 1,1,1)
 
 
         if front_min < 0.75:
@@ -719,43 +719,47 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
             else:
                 pr2.rotate_in_place(-0.45)
             continue
-
-        if abs(yaw_error) > 0.35:
-            turn = max(-1.8, min(1.8, 2.0 * yaw_error))
-            left = -turn
-            right = turn
-        else:
-            forward = min(3.0, 1.2 + dist)
-            turn = 1.2 * yaw_error
-            left = forward - turn
-            right = forward + turn
-
-        left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
-        right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
-
-        pr2.set_wheel_speeds(left, right)
-
-        if not pr2.step():
-            return
-
-    pr2.stop()
-
-    for _ in range(200):
-        _, _, robot_yaw = pr2.get_pose()
-        yaw_error = angle_diff(goal_yaw, robot_yaw)
-
-        if abs(yaw_error) < yaw_tol:
-            break
-
-        pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
-
-    pr2.stop()
+        
 
 
+        if(0):
+
+            if abs(yaw_error) > 0.35:
+                turn = max(-1.8, min(1.8, 2.0 * yaw_error))
+                left = -turn
+                right = turn
+            else:
+                forward = min(3.0, 1.2 + dist)
+                turn = 1.2 * yaw_error
+                left = forward - turn
+                right = forward + turn
+
+            left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
+            right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
+
+            pr2.set_wheel_speeds(left, right)
+
+            if not pr2.step():
+                return
+
+        pr2.stop()
+
+        for _ in range(200):
+            _, _, robot_yaw = pr2.get_pose()
+            yaw_error = angle_diff(goal_yaw, robot_yaw)
+
+            if abs(yaw_error) < yaw_tol:
+                break
+
+            pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+
+        pr2.stop()
 
 
 
-def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
+
+
+def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 
     pos_tol = 0.28
     yaw_tol = 0.18
@@ -776,20 +780,18 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
         
 
-        if dist < pos_tol:
-            break
 
-        lidar_ranges, lidar_fov = pr2.get_lidar()
+        #lidar_ranges, lidar_fov = pr2.get_lidar()
 
         front_min = float("inf")
         left_min = float("inf")
         right_min = float("inf")
 
 
-        report(pr2,dist,front_min,left_min,right_min, 1)
+        #report(pr2,dist,front_min,left_min,right_min, 1)
 
-        left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
-        right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
+        #left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
+        #right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
   
 
         pr2.set_wheel_speeds(MAX_WHEEL_SPEED, MAX_WHEEL_SPEED)
