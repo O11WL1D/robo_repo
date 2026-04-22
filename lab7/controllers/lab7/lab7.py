@@ -636,11 +636,15 @@ def load_environment_map():
 
 
 
-def report(pr2,dist, front, left, right,range ):
+def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
     print("Current x and y pose: " + str(pr2.get_pose()))
     print("Dist: " +str(dist))
     print("lidar front, left, right : " +str(front) + " " + str(left) + " " + str(right) )
-    print("ranges "+ str(range))
+    print("goal angle "+ str(range1))
+    print("yaw error "+ str(range2))
+    print("front vals "+ str(range3))
+    print("left vals "+ str(range4))
+    print("right vals "+ str(range5))
 
 
 
@@ -651,7 +655,7 @@ def report(pr2,dist, front, left, right,range ):
 
 
 #TODO 8
-def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
+def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
     max_steps = 2000
@@ -681,7 +685,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         right_min = float("inf")
 
 
-        report(pr2,dist,front_min,left_min,right_min, 1)
+        
 
         if lidar_ranges:
             n = len(lidar_ranges)
@@ -694,6 +698,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             right_vals = [r for r in lidar_ranges[max(0, c - n // 4):max(0, c - n // 10)]
                           if not (math.isnan(r) or math.isinf(r))]
 
+
             if front_vals:
                 front_min = min(front_vals)
             if left_vals:
@@ -703,6 +708,10 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
         goal_angle = math.atan2(dy, dx)
         yaw_error = angle_diff(goal_angle, robot_yaw)
+
+
+        report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_vals,left_vals,right_vals)
+
 
         if front_min < 0.75:
             if left_min > right_min:
@@ -745,6 +754,45 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 
 
+
+def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
+
+    pos_tol = 0.28
+    yaw_tol = 0.18
+    max_steps = 2000
+
+    def angle_diff(a, b):
+        d = a - b
+        return (d + math.pi) % (2 * math.pi) - math.pi
+
+    for _ in range(max_steps):
+        robot_x, robot_y, robot_yaw = pr2.get_pose()
+
+        
+
+        dx = goal_x - robot_x
+        dy = goal_y - robot_y
+        dist = math.hypot(dx, dy)
+
+        
+
+        if dist < pos_tol:
+            break
+
+        lidar_ranges, lidar_fov = pr2.get_lidar()
+
+        front_min = float("inf")
+        left_min = float("inf")
+        right_min = float("inf")
+
+
+        report(pr2,dist,front_min,left_min,right_min, 1)
+
+        left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
+        right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
+  
+
+        pr2.set_wheel_speeds(MAX_WHEEL_SPEED, MAX_WHEEL_SPEED)
 
 
 
