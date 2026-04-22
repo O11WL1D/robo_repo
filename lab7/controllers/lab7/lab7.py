@@ -552,10 +552,9 @@ class PR2Controller:
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     def _set_arm(self, motors, sensors, q, wait=True):
-        for i, (m, a) in enumerate(zip(motors, q)):         
-            lo, hi = PR2_JOINT_LIMITS[i]         
+        for m, a in zip(motors, q):
+            lo, hi = -6.28, 6.28
             if m: m.setPosition(max(lo, min(hi, float(a))))
-
         if wait:
             for _ in range(900):
                 if not self.step(): return
