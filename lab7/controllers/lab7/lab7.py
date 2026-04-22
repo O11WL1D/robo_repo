@@ -656,6 +656,9 @@ def report(pr2,dist, front, left, right,range1,range2,range3,range4,range5 ):
 
 #TODO 8
 #mostly unedited
+#env_map isnt used/ we should be utilizing potential fields
+#to navigate -> lab 5 material.
+
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
@@ -760,6 +763,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 
 #TODO 8
+#edited version
 def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
     pos_tol = 0.28
     yaw_tol = 0.18
@@ -817,49 +821,22 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 
         report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min)
 
-        #looks like up until checkpoint1 the robot
-        #rotates to face depot table. 
-        if front_min < 0.75:
-            if left_min > right_min:
-                pr2.rotate_in_place(0.45)
-            else:
-                pr2.rotate_in_place(-0.45)
-            continue
+  
         
 
         #checkpoint1
-        if(0):
+        if(1):
 
-            if abs(yaw_error) > 0.35:
-                turn = max(-1.8, min(1.8, 2.0 * yaw_error))
-                left = -turn
-                right = turn
-            else:
-                forward = min(3.0, 1.2 + dist)
-                turn = 1.2 * yaw_error
-                left = forward - turn
-                right = forward + turn
+  
 
-            left = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, left))
-            right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, right))
 
-            pr2.set_wheel_speeds(left, right)
 
-            if not pr2.step():
-                return
-
-        pr2.stop()
-
-        for _ in range(200):
-            _, _, robot_yaw = pr2.get_pose()
-            yaw_error = angle_diff(goal_yaw, robot_yaw)
-
-            if abs(yaw_error) < yaw_tol:
-                break
+ 
+            #pr2.set_wheel_speeds(MAX_WHEEL_SPEED, MAX_WHEEL_SPEED)
 
             pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
 
-        pr2.stop()
+      
 
 
 
