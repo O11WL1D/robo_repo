@@ -176,7 +176,7 @@ def gradient_descent_ik(target, q0=None, alpha=0.5, tol=0.008, max_iter=4000):
 
 #TODO Implement 4
 
-def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
+def compute_potential_field(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
     fx = goal_x - robot_x
     fy = goal_y - robot_y
 
@@ -962,8 +962,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             #determine dxdy
             #not sure whats going on here but this doesnt
             
-            result2=compute_potential_field2(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+            result2=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+            result3=compute_potential_field_reinit(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
           
+            print("potential field implementation 1 "+ str(result2))
+            print("Potential field implementation 2 " + str(result3))
+
+
 
             #compute_potential_field2 is literially just adding the min left and min right values 
             #to the goal angle -> adds in a sort of potential field, things closer will repulse the 
@@ -982,15 +987,11 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
            
 
 
-            counter+=1
-
-        
-
                 #pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
 
             
 
-            pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
+            #pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
 
 
 
