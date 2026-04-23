@@ -200,6 +200,7 @@ def compute_potential_field(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lida
 
 
 
+#Gavin code
 
 def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
 
@@ -210,6 +211,8 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
 
 
         n = len(lidar_ranges)
+        max_radians=4.5378
+        radians_per_measurement=(max_radians/n)
         c = n // 2
 
         front_vals = [r for r in lidar_ranges[max(0, c - n // 14):min(n, c + n // 14 + 1)]
@@ -229,6 +232,16 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
 
         #goal_angle = math.atan2(dy, dx)
         #yaw_error = angle_diff(goal_angle, robot_yaw)
+
+
+
+
+
+
+
+
+
+
 
         
         return np.array([left_min/100, right_min/100], dtype=float)
@@ -811,6 +824,8 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 
 
+robot_state=0
+counter=0
 
 
 #TODO 8
@@ -818,7 +833,8 @@ def navigate_to_goal2(pr2, goal_x, goal_y, goal_yaw, env_map):
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
     
-    
+    global robot_state
+    global counter
     
 
 
@@ -829,6 +845,8 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
     def angle_diff(a, b):
         d = a - b
         return (d + math.pi) % (2 * math.pi) - math.pi
+
+
 
     for _ in range(max_steps):
         robot_x, robot_y, robot_yaw = pr2.get_pose()
@@ -855,6 +873,12 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             break
 
         lidar_ranges, lidar_fov = pr2.get_lidar()
+
+
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR FOV")
+        print(lidar_fov)
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR ranges")
+        #print(lidar_ranges)
 
         front_min = float("inf")
         left_min = float("inf")
@@ -912,17 +936,35 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             #goal_angle=goal_angle+x2+y2
 
             
-   
+            
+
+            
             report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
            
-            if(abs(yaw_error)<0.02):
-                print("NOW DRIVING ")
+
+
+            counter+=1
+
+        
+
+                #pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+
+            
+
+            pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
+
+
+
+
+            #if(abs(yaw_error)<0.0018):
+               # print("NOW DRIVING ")
                 
-                pr2.set_wheel_speeds(MAX_WHEEL_SPEED,MAX_WHEEL_SPEED)
 
-            else:
+            
+            #else:
 
-                pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+            #pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+            #print(abs(yaw_error))
 
       
 
