@@ -875,14 +875,13 @@ counter=0
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
     
-    global robot_state
-    global counter
+    
     
 
 
     pos_tol = 0.28
     yaw_tol = 0.18
-    max_steps = 20000
+    max_steps = 20000000
 
     def angle_diff(a, b):
         d = a - b
@@ -1021,9 +1020,9 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
                 pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
                 #print("@@@@@@@@@@@@@@@@@@@@@@@ROTATING")
             else:
-                pr2.stop()
+                #pr2.stop()
                 pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
-                #print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
+                print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
            
 
       
