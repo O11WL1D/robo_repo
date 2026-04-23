@@ -176,7 +176,7 @@ def gradient_descent_ik(target, q0=None, alpha=0.5, tol=0.008, max_iter=4000):
 
 #TODO Implement 4
 
-def compute_potential_field(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
+def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
     fx = goal_x - robot_x
     fy = goal_y - robot_y
 
@@ -230,6 +230,20 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
         if right_vals:
             right_min = min(right_vals)
 
+
+
+        
+        return np.array([left_min/100, right_min/100], dtype=float)
+
+
+# Gavin Code other method
+def compute_potential_field_reinit(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
+
+
+        n = len(lidar_ranges)
+        max_radians=4.5378
+        radians_per_measurement=(max_radians/n)
+
         #goal_angle = math.atan2(dy, dx)
         #yaw_error = angle_diff(goal_angle, robot_yaw)
 
@@ -242,24 +256,34 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
         object_position_x=0
         object_position_y=0
 
+        dx=0
+        dy=0
+
         for i in range(n):
+
+
             print("do something")
+
+
             object_position_x= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
             object_position_y= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
             
+            if(not((reading_to_meters*lidar_ranges[i])>D0)):
+
+                #repulsive potential
+                dx+=((1/2)*K_REP)* (1/(abs(robot_x-object_position_x)^2))
+                dy+=((1/2)*K_REP)* (1/(abs(robot_y-object_position_y)^2))
+
+
+                #attractive potential 
+                dx+=((1/2)*K_ATT)* ((abs(robot_x-goal_x)^2))
+                dy+=((1/2)*K_ATT)* ((abs(robot_y-goal_y)^2))
+
+            return np.array([dx, dy], dtype=float)
 
 
 
 
-
-
-
-
-
-
-
-        
-        return np.array([left_min/100, right_min/100], dtype=float)
 
 
         
