@@ -259,7 +259,7 @@ def compute_potential_field_reinit(robot_x, robot_y, goal_x, goal_y, lidar_range
         dx=0
         dy=0
 
-        print("N VALUE" + str(n))
+        #print("N VALUE" + str(n))
 
         for i in range(n):
 
@@ -917,9 +917,9 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         lidar_ranges, lidar_fov = pr2.get_lidar()
 
 
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR FOV")
-        print(lidar_fov)
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR ranges")
+        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR FOV")
+        #print(lidar_fov)
+        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR ranges")
         #print(lidar_ranges)
 
         front_min = float("inf")
@@ -970,8 +970,8 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             result2=compute_potential_field(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
             result3=compute_potential_field_reinit(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
           
-            print("potential field implementation 1 "+ str(result2))
-            print("Potential field implementation 2 " + str(result3))
+            #print("potential field implementation 1 "+ str(result2))
+            #print("Potential field implementation 2 " + str(result3))
 
 
 
@@ -997,7 +997,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             
 
             
-            report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
+            #report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
            
 
 
@@ -1019,11 +1019,11 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             #if ((_%1000) > 500):
             if(yaw_error<0):
                 pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
-                print("@@@@@@@@@@@@@@@@@@@@@@@ROTATING")
+                #print("@@@@@@@@@@@@@@@@@@@@@@@ROTATING")
             else:
                 pr2.stop()
                 pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
-                print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
+                #print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
            
 
       
