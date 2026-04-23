@@ -233,6 +233,21 @@ def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lid
         #goal_angle = math.atan2(dy, dx)
         #yaw_error = angle_diff(goal_angle, robot_yaw)
 
+        reading_to_meters=1
+        #this is the factor that converts a lidar reading to the distance at which 
+        #it reads something. temp value to be adjusted in future. 
+
+
+        #this is relative to the robot fov
+        object_position_x=0
+        object_position_y=0
+
+        for i in range(n):
+            print("do something")
+            object_position_x= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
+            object_position_y= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
+            
+
 
 
 
