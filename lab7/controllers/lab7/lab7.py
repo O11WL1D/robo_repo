@@ -39,7 +39,7 @@ MAX_WHEEL_SPEED  = 6.0   # rad/s  — maximum wheel angular velocity
 ROBOT_RADIUS     = 0.335 # m      — PR2 base half-width (for collision check)
 
 # Potential field tuning (you may adjust these in your TODO section)
-K_ATT    = 1.5   # attractive gain
+K_ATT    = 5.5   # attractive gain
 K_REP    = 0.8   # repulsive gain
 D0       = 1.2   # influence radius (m) — obstacles beyond this are ignored
 STUCK_THRESHOLD = 0.03   # m — if robot moves less than this, it may be stuck
@@ -882,7 +882,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
     pos_tol = 0.28
     yaw_tol = 0.18
-    max_steps = 2000
+    max_steps = 20000
 
     def angle_diff(a, b):
         d = a - b
