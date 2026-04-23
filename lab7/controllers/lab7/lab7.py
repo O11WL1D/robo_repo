@@ -259,14 +259,17 @@ def compute_potential_field_reinit(robot_x, robot_y, goal_x, goal_y, lidar_range
         dx=0
         dy=0
 
+        print("N VALUE" + str(n))
+
         for i in range(n):
 
 
-            print("do something")
+            #print("do something")
 
 
             object_position_x= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
             object_position_y= (reading_to_meters*lidar_ranges[i])*math.cos(radians_per_measurement*i)
+            print("OBJECT POSITION " + str(object_position_x) + "  " +str(object_position_y) )
             
             if(not((reading_to_meters*lidar_ranges[i])>D0)):
 
@@ -275,11 +278,11 @@ def compute_potential_field_reinit(robot_x, robot_y, goal_x, goal_y, lidar_range
                 dy+=((1/2)*K_REP)* (1/(abs(robot_y-object_position_y)^2))
 
 
-                #attractive potential 
-                dx+=((1/2)*K_ATT)* ((abs(robot_x-goal_x)^2))
-                dy+=((1/2)*K_ATT)* ((abs(robot_y-goal_y)^2))
-
-            return np.array([dx, dy], dtype=float)
+  
+        #attractive potential 
+        dx+=((1/2)*K_ATT)* ((abs(robot_x-goal_x)^2))
+        dy+=((1/2)*K_ATT)* ((abs(robot_y-goal_y)^2))
+        return np.array([dx, dy], dtype=float)
 
 
 
