@@ -1010,15 +1010,21 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
 
 
-            #if(abs(yaw_error)<0.0018):
+            #
                # print("NOW DRIVING ")
-                
+            
 
             
-            #else:
-
-            pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
-            #print(abs(yaw_error))
+         
+            #if ((_%1000) > 500):
+            if(yaw_error<0):
+                pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+                print("@@@@@@@@@@@@@@@@@@@@@@@ROTATING")
+            else:
+                pr2.stop()
+                pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
+                print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
+           
 
       
 
