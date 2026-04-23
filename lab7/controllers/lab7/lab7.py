@@ -962,11 +962,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         if(1):
 
             
-            #determine dxdy
-            #not sure whats going on here but this doesnt
-            
-            result2=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
-            result3=compute_potential_field_reinit(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
+           
+            robot_pose_x=pr2.get_pose()[0]
+            robot_pose_y=pr2.get_pose()[1]
+
+
+            result2=compute_potential_field(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
+            result3=compute_potential_field_reinit(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
           
             print("potential field implementation 1 "+ str(result2))
             print("Potential field implementation 2 " + str(result3))
@@ -979,9 +981,18 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
             x2=result2[0]
             y2=result2[1]
+            
+
+            goal_x=robot_pose_x+x2
+            goal_y=robot_pose_y+y2
 
             #goal_angle=goal_angle+x2+y2
 
+            dx = goal_x - robot_pose_x
+            dy = goal_y - robot_pose_y
+            dist = math.hypot(dx, dy)
+            goal_angle = math.atan2(dy, dx)
+            yaw_error = angle_diff(goal_angle, robot_yaw)
             
             
 
@@ -1006,7 +1017,7 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             
             #else:
 
-            #pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+            pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
             #print(abs(yaw_error))
 
       
