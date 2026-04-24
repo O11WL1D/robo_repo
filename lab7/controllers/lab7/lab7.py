@@ -176,64 +176,111 @@ def gradient_descent_ik(target, q0=None, alpha=0.5, tol=0.008, max_iter=4000):
 
 #TODO Implement 4
 
-def compute_potential_field(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
-    fx = goal_x - robot_x
-    fy = goal_y - robot_y
+#TODO Implement 4
+def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_ranges, lidar_fov):
+    # Standard attractive force
+    fx = K_ATT * (goal_x - robot_x)
+    fy = K_ATT * (goal_y - robot_y)
 
     n = len(lidar_ranges)
     if n == 0:
         return np.array([fx, fy], dtype=float)
 
+    rep_x = 0.0
+    rep_y = 0.0
+
     for i, r in enumerate(lidar_ranges):
         if math.isnan(r) or math.isinf(r):
             continue
-        if r <= 0.05 or r > D0:
+            
+        # Prevent divide-by-zero, ignore things outside D0
+        if r <= 0.1 or r > D0:
             continue
 
-        angle = -lidar_fov / 2.0 + i * lidar_fov / max(n - 1, 1)
+        # Lidar angle in robot-local frame
+        local_angle = -lidar_fov / 2.0 + i * (lidar_fov / max(n - 1, 1))
+        # Convert to world frame
+        world_angle = robot_yaw + local_angle
+
+        # Calculate standard repulsive magnitude
         mag = K_REP * (1.0 / r - 1.0 / D0) / (r * r)
 
-        fx += -mag * math.cos(angle)
-        fy += -mag * math.sin(angle)
+        # Cap the magnitude to prevent math explosions (1/0), 
+        # but DO NOT scale by d_theta so the rays can add up and overpower K_ATT!
+        mag = min(mag, 50.0) 
 
-    return np.array([fx, fy], dtype=float)
+        rep_x += -mag * math.cos(world_angle)
+        rep_y += -mag * math.sin(world_angle)
+
+    return np.array([fx + rep_x, fy + rep_y], dtype=float)
 
 
 
 #Gavin code
 
-def compute_potential_field2(robot_x, robot_y, goal_x, goal_y, lidar_ranges, lidar_fov):
+def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_ranges, lidar_fov):
+    def angle_diff(a, b):
+        d = a - b
+        return (d + math.pi) % (2 * math.pi) - math.pi
 
-    
-        def angle_diff(a, b):
-            d = a - b
-            return (d + math.pi) % (2 * math.pi) - math.pi
+    dx = goal_x - robot_x
+    dy = goal_y - robot_y
+    dist_to_goal = math.hypot(dx, dy)
+    if dist_to_goal > 0:
+        fx = K_ATT * dx / dist_to_goal
+        fy = K_ATT * dy / dist_to_goal
+    else:
+        return np.array([0.0, 0.0], dtype=float)
 
+    n = len(lidar_ranges)
+    if n == 0:
+        return np.array([fx, fy], dtype=float)
+    zone_size = n // 8   # each zone is 1/8 of FOV
 
-        n = len(lidar_ranges)
-        max_radians=4.5378
-        radians_per_measurement=(max_radians/n)
-        c = n // 2
+    c = n // 2  # center = straight ahead
 
-        front_vals = [r for r in lidar_ranges[max(0, c - n // 14):min(n, c + n // 14 + 1)]
-                        if not (math.isnan(r) or math.isinf(r))]
-        left_vals = [r for r in lidar_ranges[min(n - 1, c + n // 10):min(n, c + n // 4)]
-                        if not (math.isnan(r) or math.isinf(r))]
-        right_vals = [r for r in lidar_ranges[max(0, c - n // 4):max(0, c - n // 10)]
-                        if not (math.isnan(r) or math.isinf(r))]
+    # Define zones by index ranges
+    zones = {
+        "front":       (c - zone_size,     c + zone_size),
+        "front_left":  (c + zone_size,     c + zone_size * 3),
+        "front_right": (c - zone_size * 3, c - zone_size),
+    }
 
+    # front pushes back, front_left pushes right, front_right pushes left
+    zone_push = {
+        "front":       (robot_yaw + math.pi * 0.75,   1.0),   # push back and left (instead of straight back)
+        "front_left":  (robot_yaw - math.pi / 2,      0.7),   
+        "front_right": (robot_yaw + math.pi / 2,      0.7),   
+    }
 
-        if front_vals:
-            front_min = min(front_vals)
-        if left_vals:
-            left_min = min(left_vals)
-        if right_vals:
-            right_min = min(right_vals)
+    rep_x = 0.0
+    rep_y = 0.0
 
+    for zone_name, (i_start, i_end) in zones.items():
+        i_start = max(0, i_start)
+        i_end   = min(n, i_end)
 
+        vals = [lidar_ranges[i] for i in range(i_start, i_end)
+                if not (math.isnan(lidar_ranges[i]) or math.isinf(lidar_ranges[i]))
+                and lidar_ranges[i] < D0]
 
-        
-        return np.array([left_min/100, right_min/100], dtype=float)
+        if not vals:
+            continue
+
+        #only use the closest obstacle in this zone
+        r = min(vals)
+        #clamp r so it never goes below 0.1 for the math, 
+        r = max(0.15, r)
+
+        #standard repulsive magnitude
+        mag = K_REP * (1.0 / r - 1.0 / D0) / (r * r)
+        mag = min(mag, 10.0)
+
+        push_angle, weight = zone_push[zone_name]
+        rep_x += weight * mag * math.cos(push_angle)
+        rep_y += weight * mag * math.sin(push_angle)
+
+    return np.array([fx + rep_x, fy + rep_y], dtype=float)
 
 
 # Gavin Code other method
@@ -320,6 +367,11 @@ def pick_object(pr2, obj_data):
     q_pick, ok2 = gradient_descent_ik(pick_base, pr2.get_right_arm_q())
     if ok2:
         pr2.set_right_arm(q_pick)
+        pr2.close_gripper(right=True)   # only close if we actually reached pick pose
+    else:
+        print(f"[WARN] IK failed for pick pose on {obj_data.get('node_type', '?')}")
+        pr2.open_gripper(right=True)
+        return  # abort this pick rather than pretend we grabbed something
 
     pr2.close_gripper(right=True)
 
@@ -466,7 +518,6 @@ class PR2Controller:
         
 
     # ── Pose (supervisor-corrected) ───────────────────────────────────────────
-    
     def get_pose(self):
         """
         Return (x, y, yaw) in world frame.
@@ -484,12 +535,52 @@ class PR2Controller:
             except Exception:
                 pass
         # IMU fallback for yaw
-        
         if self._imu:
             self._yaw = self._imu.getRollPitchYaw()[2]
-   
         return self._x, self._y, self._yaw
+    
+    def get_pose_realtime(self):
+        """
+        Dead reckoning pose using wheel encoders + IMU yaw.
+        Call this instead of get_pose() for real-time position.
+        """
+        # Get real yaw from IMU
+        if self._imu:
+            self._yaw = self._imu.getRollPitchYaw()[2]
         
+        # Average left and right wheel positions for distance traveled
+        left_wheels  = [self._ws[0], self._ws[2], self._ws[4], self._ws[6]]
+        right_wheels = [self._ws[1], self._ws[3], self._ws[5], self._ws[7]]
+        
+        left_pos  = [s.getValue() for s in left_wheels  if s is not None]
+        right_pos = [s.getValue() for s in right_wheels if s is not None]
+        
+        if not left_pos or not right_pos:
+            return self._x, self._y, self._yaw
+    
+        left_avg  = sum(left_pos)  / len(left_pos)
+        right_avg = sum(right_pos) / len(right_pos)
+    
+        # Wheel radius ~0.08m for PR2
+        WHEEL_RADIUS = 0.08
+    
+        if not hasattr(self, '_last_left'):
+            self._last_left  = left_avg
+            self._last_right = right_avg
+            return self._x, self._y, self._yaw
+    
+        dl = (left_avg  - self._last_left)  * WHEEL_RADIUS
+        dr = (right_avg - self._last_right) * WHEEL_RADIUS
+    
+        self._last_left  = left_avg
+        self._last_right = right_avg
+    
+        dist = (dl + dr) / 2.0
+    
+        self._x += dist * math.cos(self._yaw)
+        self._y += dist * math.sin(self._yaw)
+    
+        return self._x, self._y, self._yaw     
 
     # ── Lidar ─────────────────────────────────────────────────────────────────
     
@@ -684,33 +775,20 @@ class PR2Controller:
 #TODO 7
 
 def load_environment_map():
-
-    print("load environment map called")
-    #why isnt this being called
-    """Load the environment_map.json generated by the supervisor."""
-    base_dir = os.path.dirname(os.path.abspath(""))
-    project_dir = os.path.abspath(os.path.join(base_dir, "..", ".."))
-
-
-    print("CURRENT BASE DIR: "+ str(base_dir) )
-    print("CURRENT PROJECT DIR: "+ str(project_dir) )
-    project_dir=project_dir+"\lab7"
-
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # use __file__, not ""
     paths = [
-        os.path.join(project_dir, "environment_map.json"),
         os.path.join(base_dir, "environment_map.json"),
         os.path.join(base_dir, "..", "lab7_supervisor", "environment_map.json"),
-   
+        os.path.join(base_dir, "..", "..", "lab7", "environment_map.json"),
     ]
     for _ in range(200):
         for path in paths:
-            print("Current path: "+str(path))
             if os.path.exists(path):
                 with open(path, "r") as f:
                     return json.load(f)
         import time
         time.sleep(0.05)
-    raise FileNotFoundError("environment_map.json not found")
+    raise FileNotFoundError("environment_map.json not found after waiting")
 
 
 
@@ -872,162 +950,82 @@ counter=0
 
 #TODO 8
 #Gavin Code
+
+#TODO 8
 def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
-
-    
-    
-    
-
-
     pos_tol = 0.28
     yaw_tol = 0.18
-    max_steps = 20000000
+    max_steps = 8000
 
     def angle_diff(a, b):
         d = a - b
         return (d + math.pi) % (2 * math.pi) - math.pi
 
-
-
-    for _ in range(max_steps):
+    for step in range(max_steps):
         robot_x, robot_y, robot_yaw = pr2.get_pose()
-
-
-
-        #potential field method 2, navigate to current pose+ dx and +dy until goal position actually reached.
-        #result=compute_potential_field(pr2.get_pose()[0],pr2.get_pose()[1], goal_x, goal_y, lidar_ranges, lidar_fov)
-        #dx=result[0]
-        #dy=result[1]
-        #goal_x=robot_x+dx
-        #goal_y=robot_y+dy
-
-        
-            
 
         dx = goal_x - robot_x
         dy = goal_y - robot_y
         dist = math.hypot(dx, dy)
 
-        
+        if step % 20 == 0:
+            print(f"[NAV] dist={dist:.3f}  pos=({robot_x:.2f},{robot_y:.2f})  goal=({goal_x:.2f},{goal_y:.2f})")
 
         if dist < pos_tol:
+            print("[NAV] Goal reached!")
             break
 
-        lidar_ranges, lidar_fov = pr2.get_lidar()
-
-
-        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR FOV")
-        #print(lidar_fov)
-        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@NOW OUTPUTTING LIDAR ranges")
-        #print(lidar_ranges)
-
-        front_min = float("inf")
-        left_min = float("inf")
-        right_min = float("inf")
-
-
-        
-
-        if lidar_ranges:
-            n = len(lidar_ranges)
-            c = n // 2
-
-            front_vals = [r for r in lidar_ranges[max(0, c - n // 14):min(n, c + n // 14 + 1)]
-                          if not (math.isnan(r) or math.isinf(r))]
-            left_vals = [r for r in lidar_ranges[min(n - 1, c + n // 10):min(n, c + n // 4)]
-                         if not (math.isnan(r) or math.isinf(r))]
-            right_vals = [r for r in lidar_ranges[max(0, c - n // 4):max(0, c - n // 10)]
-                          if not (math.isnan(r) or math.isinf(r))]
-
-
-            if front_vals:
-                front_min = min(front_vals)
-            if left_vals:
-                left_min = min(left_vals)
-            if right_vals:
-                right_min = min(right_vals)
-
-        goal_angle = math.atan2(dy, dx)
-        
-        yaw_error = angle_diff(goal_angle, robot_yaw)
-
-
-        
-
-  
-        
-
-        #checkpoint1
-        if(1):
-
-            
-           
-            robot_pose_x=pr2.get_pose()[0]
-            robot_pose_y=pr2.get_pose()[1]
-
-
-            result2=compute_potential_field(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
-            result3=compute_potential_field_reinit(robot_pose_x,robot_pose_y, goal_x, goal_y, lidar_ranges, lidar_fov)
-          
-            #print("potential field implementation 1 "+ str(result2))
-            #print("Potential field implementation 2 " + str(result3))
-
-
-
-            #compute_potential_field2 is literially just adding the min left and min right values 
-            #to the goal angle -> adds in a sort of potential field, things closer will repulse the 
-            #robot angle away. 
-
-            x2=result2[0]
-            y2=result2[1]
-            
-
-            goal_x=robot_pose_x+x2
-            goal_y=robot_pose_y+y2
-
-            #goal_angle=goal_angle+x2+y2
-
-            dx = goal_x - robot_pose_x
-            dy = goal_y - robot_pose_y
-            dist = math.hypot(dx, dy)
+        #only use potential field when far from goal
+        if dist < 0.30:
             goal_angle = math.atan2(dy, dx)
             yaw_error = angle_diff(goal_angle, robot_yaw)
             
+
+
+
+        else:
+            lidar_ranges, lidar_fov = pr2.get_lidar()
+            force = compute_potential_field(
+                robot_x, robot_y, robot_yaw,
+                goal_x, goal_y,
+                lidar_ranges, lidar_fov
+            )
             
-
+            force_angle = math.atan2(force[1], force[0])
+            magnitude=math.sqrt(force[1]**2 + force[0]**2)
             
-            #report(pr2,dist,front_min,left_min,right_min, goal_angle,yaw_error, front_min,left_min,right_min,dx,dy,goal_x,goal_y)
-           
+            yaw_error = angle_diff(force_angle, robot_yaw)
+            if step % 20 == 0:
+                print(f"force angle={force_angle:.3f}  yaw_error=({yaw_error:.2f})  magnitude=({magnitude:.2f})  ")
 
+        #or (magnitude<4)
+        #rotate in place if very misaligned
+        if (abs(yaw_error) > 1.0) :
+            pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error)))
+            continue
 
-                #pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
+        forward = 3.0 
+        turn = 2.5 * yaw_error
 
-            
+        left  = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, forward - turn))
+        right = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, forward + turn))
+        pr2.set_wheel_speeds(left, right)
 
-            #pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
+        if not pr2.step():
+            return
 
+    pr2.stop()
+    print(f"[NAV] Stopped. Final dist={math.hypot(goal_x - robot_x, goal_y - robot_y):.3f}")
 
+    # Final yaw alignment
+    for _ in range(200):
+        _, _, robot_yaw = pr2.get_pose()
+        yaw_error = angle_diff(goal_yaw, robot_yaw)
+        if abs(yaw_error) < yaw_tol:
+            break
+        pr2.rotate_in_place(max(-0.4, min(0.4, yaw_error)))
 
-
-            #
-               # print("NOW DRIVING ")
-            
-
-            
-         
-            #if ((_%1000) > 500):
-            if(yaw_error<0):
-                pr2.rotate_in_place(max(-0.35, min(0.35, yaw_error)))
-                #print("@@@@@@@@@@@@@@@@@@@@@@@ROTATING")
-            else:
-                #pr2.stop()
-                pr2.set_wheel_speeds(MAX_WHEEL_SPEED ,MAX_WHEEL_SPEED)
-                print("@@@@@@@@@@@@@@@@@@@@@@@DRIVING")
-           
-
-      
-
-
+    pr2.stop()
 
 
 
@@ -1089,23 +1087,33 @@ def navigate_to_goal_test(pr2, goal_x, goal_y, goal_yaw, env_map):
 #Do not modify the main
 def main():
     print("main started")
+    
     pr2 = PR2Controller()
 
-    #currently this checkpoint is never reached so there is something wrong with pr2
-    print("main checkpoint 1")
+    # Wait until supervisor gives us a real pose
+    print("Waiting for valid pose from supervisor...")
+    for _ in range(200):
+        pr2.step()
+        x, y, yaw = pr2.get_pose()
+        print(f"  get_pose: x={x:.4f}, y={y:.4f}, yaw={yaw:.4f}")
+        if not (abs(x) < 0.01 and abs(y - 1.0) < 0.01):
+            print(f"Got valid pose: x={x:.2f}, y={y:.2f}, yaw={yaw:.2f}")
+            break
+    else:
+        print("[WARN] Never got a non-default pose — supervisor may not be running")
 
-    env = load_environment_map()
-    #load_environment_map()
-    #this 
     print("main checkpoint 1")
+    env = load_environment_map()
+    print("main checkpoint 2")
 
     objects    = env.get("pick_objects",    {})
-    print("now printing objects")
-    print(objects)
     nav_goals  = env.get("navigation_goals", {})
     place_zone = env.get("place_zone",      {})
 
-    print("main checkpoint 2")
+    print("now printing objects")
+    print(objects)
+    print("main checkpoint 3")
+
     # ── Pick OBJECT_1 ─────────────────────────────────────────────────────────
     if "OBJECT_1" in objects:
         print("OBJECT 1 DETECTED")
@@ -1113,7 +1121,6 @@ def main():
         navigate_to_goal(pr2, g1["position"][0], g1["position"][1],
                          g1["yaw_radians"], env)
         pick_object(pr2, objects["OBJECT_1"])
-
     # ── Pick OBJECT_2 ─────────────────────────────────────────────────────────
     if "OBJECT_2" in objects:
         g2 = nav_goals["OBJECT_2"]
