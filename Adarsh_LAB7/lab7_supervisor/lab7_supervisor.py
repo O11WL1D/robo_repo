@@ -61,12 +61,12 @@ def write_environment_map():
             "node_type": obj2.getTypeName()
         }
     data["navigation_goals"]["OBJECT_1"] = {
-        "position": [-3.2, -4.6],
-        "yaw_radians": math.pi / 2
+        "position": [-2.93, -2.64],
+        "yaw_radians": -math.pi / 2
     }
     data["navigation_goals"]["OBJECT_2"] = {
-        "position": [3.2, -4.6],
-        "yaw_radians": math.pi / 2
+        "position":[ 2.05, -3.42],
+        "yaw_radians": 0
     }
     data["place_zone"] = {
         "name": "place_table",
