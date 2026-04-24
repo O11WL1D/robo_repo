@@ -223,7 +223,6 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         d = a - b
         return (d + math.pi) % (2 * math.pi) - math.pi
 
-    # --- Attractive force (normalized, constant pull strength) ---
     dx = goal_x - robot_x
     dy = goal_y - robot_y
     dist_to_goal = math.hypot(dx, dy)
@@ -236,10 +235,6 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
     n = len(lidar_ranges)
     if n == 0:
         return np.array([fx, fy], dtype=float)
-
-    # --- Split lidar into zones, take ONLY the closest reading per zone ---
-    # We only care about front-left, front, front-right
-    # Ignore rear obstacles — robot is moving forward
     zone_size = n // 8   # each zone is 1/8 of FOV
 
     c = n // 2  # center = straight ahead
@@ -251,12 +246,11 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         "front_right": (c - zone_size * 3, c - zone_size),
     }
 
-    # Direction each zone pushes the robot (in robot-local frame)
     # front pushes back, front_left pushes right, front_right pushes left
     zone_push = {
-        "front":       (robot_yaw + math.pi,          1.0),   # push straight back
-        "front_left":  (robot_yaw - math.pi / 2,      0.7),   # push right
-        "front_right": (robot_yaw + math.pi / 2,      0.7),   # push left
+        "front":       (robot_yaw + math.pi * 0.75,   1.0),   # push back and left (instead of straight back)
+        "front_left":  (robot_yaw - math.pi / 2,      0.7),   
+        "front_right": (robot_yaw + math.pi / 2,      0.7),   
     }
 
     rep_x = 0.0
@@ -266,18 +260,19 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         i_start = max(0, i_start)
         i_end   = min(n, i_end)
 
-        # Get valid readings in this zone
         vals = [lidar_ranges[i] for i in range(i_start, i_end)
                 if not (math.isnan(lidar_ranges[i]) or math.isinf(lidar_ranges[i]))
-                and 0.1 < lidar_ranges[i] < D0]
+                and lidar_ranges[i] < D0]
 
         if not vals:
             continue
 
-        # Only use the closest obstacle in this zone
+        #only use the closest obstacle in this zone
         r = min(vals)
+        #clamp r so it never goes below 0.1 for the math, 
+        r = max(0.15, r)
 
-        # Standard repulsive magnitude
+        #standard repulsive magnitude
         mag = K_REP * (1.0 / r - 1.0 / D0) / (r * r)
         mag = min(mag, 10.0)
 
@@ -973,14 +968,15 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         dy = goal_y - robot_y
         dist = math.hypot(dx, dy)
 
-        print(f"[NAV] dist={dist:.3f}  pos=({robot_x:.2f},{robot_y:.2f})  goal=({goal_x:.2f},{goal_y:.2f})")
+        if step % 20 == 0:
+            print(f"[NAV] dist={dist:.3f}  pos=({robot_x:.2f},{robot_y:.2f})  goal=({goal_x:.2f},{goal_y:.2f})")
 
         if dist < pos_tol:
             print("[NAV] Goal reached!")
             break
 
-        # Only use potential field when far from goal
-        if dist < 1.2:
+        #only use potential field when far from goal
+        if dist < 0.30:
             goal_angle = math.atan2(dy, dx)
             yaw_error = angle_diff(goal_angle, robot_yaw)
         else:
@@ -993,17 +989,12 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             force_angle = math.atan2(force[1], force[0])
             yaw_error = angle_diff(force_angle, robot_yaw)
 
-        # Rotate in place if very misaligned
+        #rotate in place if very misaligned
         if abs(yaw_error) > 1.0:
             pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error)))
             continue
 
-        # Slow down proportionally — hard stop under 0.3m
-        if dist < 0.3:
-            pr2.stop()
-            break
-
-        forward = min(MAX_WHEEL_SPEED, 3.0 * min(1.0, dist / 0.8))
+        forward = 3.0 
         turn = 2.5 * yaw_error
 
         left  = max(-MAX_WHEEL_SPEED, min(MAX_WHEEL_SPEED, forward - turn))
@@ -1113,12 +1104,10 @@ def main():
     # ── Pick OBJECT_1 ─────────────────────────────────────────────────────────
     if "OBJECT_1" in objects:
         print("OBJECT 1 DETECTED")
-        navigate_to_goal(pr2, -3.0, -4.0, 0.0, env)
         g1 = nav_goals["OBJECT_1"]
         navigate_to_goal(pr2, g1["position"][0], g1["position"][1],
                          g1["yaw_radians"], env)
         pick_object(pr2, objects["OBJECT_1"])
-
     # ── Pick OBJECT_2 ─────────────────────────────────────────────────────────
     if "OBJECT_2" in objects:
         g2 = nav_goals["OBJECT_2"]
