@@ -1000,9 +1000,25 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
 
         #or (magnitude<4)
         #rotate in place if very misaligned
+
+
+
+
+
         if (abs(yaw_error) > 1.0) :
-            pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error)))
+
+            if((magnitude<4) and abs(yaw_error) > 0.5):
+
+                pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error-45)))
+
+            else:
+                pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error)))
+            
             continue
+
+
+
+
 
         forward = 3.0 
         turn = 2.5 * yaw_error
