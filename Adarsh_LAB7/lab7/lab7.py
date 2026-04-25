@@ -223,6 +223,7 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         d = a - b
         return (d + math.pi) % (2 * math.pi) - math.pi
 
+    # --- Attractive force (normalized, constant pull strength) ---
     dx = goal_x - robot_x
     dy = goal_y - robot_y
     dist_to_goal = math.hypot(dx, dy)
@@ -235,6 +236,10 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
     n = len(lidar_ranges)
     if n == 0:
         return np.array([fx, fy], dtype=float)
+
+    # --- Split lidar into zones, take ONLY the closest reading per zone ---
+    # We only care about front-left, front, front-right
+    # Ignore rear obstacles — robot is moving forward
     zone_size = n // 8   # each zone is 1/8 of FOV
 
     c = n // 2  # center = straight ahead
@@ -246,6 +251,7 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         "front_right": (c - zone_size * 3, c - zone_size),
     }
 
+    # Direction each zone pushes the robot (in robot-local frame)
     # front pushes back, front_left pushes right, front_right pushes left
     zone_push = {
         "front":       (robot_yaw + math.pi * 0.75,   1.0),   # push back and left (instead of straight back)
@@ -260,6 +266,9 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         i_start = max(0, i_start)
         i_end   = min(n, i_end)
 
+        # Get valid readings in this zone
+        # Get valid readings in this zone
+        # NOTE: Removed the 0.1 check here so it doesn't ignore super close obstacles!
         vals = [lidar_ranges[i] for i in range(i_start, i_end)
                 if not (math.isnan(lidar_ranges[i]) or math.isinf(lidar_ranges[i]))
                 and lidar_ranges[i] < D0]
@@ -267,12 +276,14 @@ def compute_potential_field(robot_x, robot_y, robot_yaw, goal_x, goal_y, lidar_r
         if not vals:
             continue
 
-        #only use the closest obstacle in this zone
+        # Only use the closest obstacle in this zone
         r = min(vals)
-        #clamp r so it never goes below 0.1 for the math, 
+        
+        # Clamp r so it never goes below 0.1 for the math, 
+        # but the force STAYS ACTIVE when touching the wall!
         r = max(0.15, r)
 
-        #standard repulsive magnitude
+        # Standard repulsive magnitude
         mag = K_REP * (1.0 / r - 1.0 / D0) / (r * r)
         mag = min(mag, 10.0)
 
@@ -347,7 +358,11 @@ def compute_potential_field_reinit(robot_x, robot_y, goal_x, goal_y, lidar_range
 
 #TODO Implement 5 
 def pick_object(pr2, obj_data):
+    print("[PICK] Starting pick_object")
+    pr2.stop()
+
     robot_x, robot_y, robot_yaw = pr2.get_pose()
+    print(f"[PICK] Robot pose: x={robot_x:.3f}, y={robot_y:.3f}, yaw={robot_yaw:.3f}")
 
     approach_world = np.array(obj_data["approach_position"], dtype=float)
     pick_world = np.array(obj_data["pick_position"], dtype=float)
@@ -355,31 +370,36 @@ def pick_object(pr2, obj_data):
     approach_base = world_to_base(approach_world, robot_x, robot_y, robot_yaw)
     pick_base = world_to_base(pick_world, robot_x, robot_y, robot_yaw)
 
+    print(f"[PICK] approach_base = {approach_base}")
+    print(f"[PICK] pick_base = {pick_base}")
+
     pr2.set_torso(0.33)
     pr2.open_gripper(right=True)
 
     q_start = pr2.get_right_arm_q()
 
+    # Approach
     q_approach, ok1 = gradient_descent_ik(approach_base, q_start)
-    if ok1:
-        pr2.set_right_arm(q_approach)
+    print(f"[PICK] approach IK ok={ok1}")
+    pr2.set_right_arm(q_approach)
 
+    # Pick (FORCE even if IK says false)
     q_pick, ok2 = gradient_descent_ik(pick_base, pr2.get_right_arm_q())
-    if ok2:
-        pr2.set_right_arm(q_pick)
-        pr2.close_gripper(right=True)   # only close if we actually reached pick pose
-    else:
-        print(f"[WARN] IK failed for pick pose on {obj_data.get('node_type', '?')}")
-        pr2.open_gripper(right=True)
-        return  # abort this pick rather than pretend we grabbed something
+    print(f"[PICK] pick IK ok={ok2}")
+    pr2.set_right_arm(q_pick)
 
+    # Close anyway (important for debugging)
+    print("[PICK] Closing gripper")
     pr2.close_gripper(right=True)
 
+    # Lift
     q_lift, ok3 = gradient_descent_ik(approach_base, pr2.get_right_arm_q())
-    if ok3:
-        pr2.set_right_arm(q_lift)
+    print(f"[PICK] lift IK ok={ok3}")
+    pr2.set_right_arm(q_lift)
 
     pr2.set_right_arm([0., 1.35, 0., -2.0, 0.])
+    print("[PICK] Finished pick_object")
+
 
 #TODO Implement 6
 
@@ -968,14 +988,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
         dy = goal_y - robot_y
         dist = math.hypot(dx, dy)
 
-        if step % 20 == 0:
-            print(f"[NAV] dist={dist:.3f}  pos=({robot_x:.2f},{robot_y:.2f})  goal=({goal_x:.2f},{goal_y:.2f})")
+        # Print less often so your console doesn't lag the simulation
+  
 
         if dist < pos_tol:
-            print("[NAV] Goal reached!")
             break
 
-        #only use potential field when far from goal
+        # Only use potential field when far from goal
         if dist < 0.30:
             goal_angle = math.atan2(dy, dx)
             yaw_error = angle_diff(goal_angle, robot_yaw)
@@ -989,11 +1008,13 @@ def navigate_to_goal(pr2, goal_x, goal_y, goal_yaw, env_map):
             force_angle = math.atan2(force[1], force[0])
             yaw_error = angle_diff(force_angle, robot_yaw)
 
-        #rotate in place if very misaligned
+        # Rotate in place if very misaligned
         if abs(yaw_error) > 1.0:
             pr2.rotate_in_place(max(-0.6, min(0.6, yaw_error)))
             continue
 
+        # --- THE FIX ---
+        # Constant forward speed! Stop scaling it based on distance!
         forward = 3.0 
         turn = 2.5 * yaw_error
 
@@ -1108,13 +1129,7 @@ def main():
         navigate_to_goal(pr2, g1["position"][0], g1["position"][1],
                          g1["yaw_radians"], env)
         pick_object(pr2, objects["OBJECT_1"])
-    # ── Pick OBJECT_2 ─────────────────────────────────────────────────────────
-    if "OBJECT_2" in objects:
-        g2 = nav_goals["OBJECT_2"]
-        navigate_to_goal(pr2, g2["position"][0], g2["position"][1],
-                         g2["yaw_radians"], env)
-        pick_object(pr2, objects["OBJECT_2"])
-
+        navigate_to_goal(pr2, 0.00, 1.00, 0.00, env)
     # ── Place both objects ────────────────────────────────────────────────────
     if place_zone:
         pg = place_zone["nav_goal"]
