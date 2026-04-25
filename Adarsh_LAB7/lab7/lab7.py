@@ -1097,19 +1097,8 @@ def main():
     print("main started")
     
     pr2 = PR2Controller()
-
-    # Wait until supervisor gives us a real pose
-    print("Waiting for valid pose from supervisor...")
-    for _ in range(200):
-        pr2.step()
-        x, y, yaw = pr2.get_pose()
-        print(f"  get_pose: x={x:.4f}, y={y:.4f}, yaw={yaw:.4f}")
-        if not (abs(x) < 0.01 and abs(y - 1.0) < 0.01):
-            print(f"Got valid pose: x={x:.2f}, y={y:.2f}, yaw={yaw:.2f}")
-            break
-    else:
-        print("[WARN] Never got a non-default pose — supervisor may not be running")
-
+    # --- FK TESTING BLOCK ---
+   
     print("main checkpoint 1")
     env = load_environment_map()
     print("main checkpoint 2")
