@@ -49,8 +49,8 @@ def write_environment_map():
     if obj1 is not None:
         p = obj1.getField("translation").getSFVec3f()
         data["pick_objects"]["OBJECT_1"] = {
-            "approach_position": [p[0], p[1], p[2] + 0.22],
-            "pick_position":     [p[0], p[1], p[2] + 0.10],
+            "approach_position": [p[0], p[1], p[2] + 0.25],
+            "pick_position":     [p[0], p[1], p[2] + 0.12],
             "node_type": obj1.getTypeName()
         }
     if obj2 is not None:
@@ -61,19 +61,16 @@ def write_environment_map():
             "node_type": obj2.getTypeName()
         }
     data["navigation_goals"]["OBJECT_1"] = {
-        "position": [-2.93, -2.64],
+        "position": [-2.72, -2.575],
         "yaw_radians": -math.pi / 2
     }
-    data["navigation_goals"]["OBJECT_2"] = {
-        "position":[ 2.05, -3.42],
-        "yaw_radians": 0
-    }
+   
     data["place_zone"] = {
         "name": "place_table",
         "approach_position": [0.0, 5.0, 0.80],
         "place_position":    [0.0, 5.0, 0.66],
         "nav_goal": {
-            "position": [0.0, 3.8],
+            "position": [0.0, 3.90],
             "yaw_radians": math.pi / 2
         }
     }
